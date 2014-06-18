@@ -2,7 +2,7 @@
 
 describe('Anvil', function () {
 
-  var Anvil, AnvilProvider, issuer, options;
+  var Anvil, AnvilProvider, $location, issuer, options;
 
   issuer = 'https://accounts.anvil.io'
 
@@ -89,5 +89,28 @@ describe('Anvil', function () {
     });
   });
 
+
+
+  describe('urls', function () {
+
+    it('should be available on service', function () {
+      expect(Anvil.urls.authorize).toBeDefined()
+    });
+
+  });
+
+
+  describe('callback', function () {
+
+    beforeEach(inject(function ($location) {
+      $location.hash('error=access_denied&error_description=test')
+    }));
+
+    it('should parse the uri fragment', function () {
+      expect(Anvil.response().error).toEqual('access_denied')
+      expect(Anvil.response().error_description).toEqual('test')
+    });
+
+  });
 
 });

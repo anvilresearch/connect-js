@@ -64,23 +64,35 @@ angular.module('anvil', [])
      * Parse Form Urlencoded data
      */
 
-    //function parseFormUrlEncoded (str) {
-    //  var obj = {};
+    function parseFormUrlEncoded (str) {
+      var obj = {};
 
-    //  str.split('&').forEach(function (property) {
-    //    var pair = property.split('=')
-    //      , key  = pair[0]
-    //      , val  = pair[1]
-    //      ;
+      str.split('&').forEach(function (property) {
+        var pair = property.split('=')
+          , key  = pair[0]
+          , val  = pair[1]
+          ;
 
-    //    obj[key] = val;
-    //  });
+        obj[key] = val;
+      });
 
-    //  return obj;
-    //}
+      return obj;
+    }
 
 
-    this.$get = ['$q', '$http', '$window', function ($q, $http, $window) {
+    this.$get = ['$location', function ($location) {
+
+
+      /**
+       * Anvil Service
+       */
+
+      return {
+        urls: urls,
+        response: function () {
+          return parseFormUrlEncoded($location.hash());
+        }
+      }
 
       /**
        * OAuth Request
