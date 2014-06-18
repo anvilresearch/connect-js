@@ -1,0 +1,28 @@
+{
+  "name": "anvil-connect",
+  "version": "0.0.0",
+  "homepage": "https://github.com/christiansmith/anvil-connect-js",
+  "authors": [
+    "Christian Smith <smith@anvil.io>",
+    "Tom Kersten <tom@whitespur.com>"
+  ],
+  "description": "JavaScript SDK for Anvil Connect",
+  "main": "anvil-connect.js",
+  "keywords": [
+    "OpenID Connect",
+    "OAuth 2.0",
+    "Identity",
+    "Access Control",
+    "Authentication",
+    "Authorization",
+    "Users"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

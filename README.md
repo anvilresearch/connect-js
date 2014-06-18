@@ -1,4 +1,2 @@
-anvil-connect-js
-================
+# JavaScript SDK for Anvil Connect
 
-JavaScript SDK for Anvil Connect

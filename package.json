@@ -1,0 +1,46 @@
+{
+  "name": "anvil-connect-js",
+  "version": "0.0.0",
+  "description": "JavaScript SDK for Anvil Connect",
+  "author": {
+    "name": "Christian Smith",
+    "email": "smith@anvil.io",
+    "url": "http://anvil.io"
+  },
+  "contributors": [
+    {
+      "name": "Tom Kersten",
+      "email": "tom@whitespur.com",
+      "url": "http://tomkersten.com"
+    }
+  ],
+  "main": "anvil-connect.js",
+  "scripts": {
+    "test": "karma start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/christiansmith/anvil-connect-js.git"
+  },
+  "keywords": [
+    "OpenID Connect",
+    "OAuth 2.0",
+    "Identity",
+    "Access Control",
+    "Authentication",
+    "Authorization",
+    "Users"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/christiansmith/anvil-connect-js/issues"
+  },
+  "homepage": "https://github.com/christiansmith/anvil-connect-js",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-karma": "^0.8.3",
+    "karma": "^0.12.16",
+    "karma-jasmine": "^0.1.5",
+    "karma-phantomjs-launcher": "^0.1.4"
+  }
+}
