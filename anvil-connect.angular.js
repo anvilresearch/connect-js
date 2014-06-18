@@ -22,7 +22,7 @@ angular.module('anvil', [])
         response_type:  options.response_type || 'id_token token',
         client_id:      options.client_id,
         redirect_uri:   options.redirect_uri,
-        scope:          ['openid', 'profile'].concat(options.scope || []),
+        scope:          ['openid', 'profile'].concat(options.scope || []).join(' '),
         // other
       };
 
@@ -30,11 +30,11 @@ angular.module('anvil', [])
 
       urls = {
         authorize:  issuer + '/authorize?' + encodedParams,
-        signin:     issuer + '/signup?'    + encodedParams,
-        signup:     issuer + '/signin?'    + encodedParams,
+        signin:     issuer + '/signin?'    + encodedParams,
+        signup:     issuer + '/signup?'    + encodedParams,
         userinfo:   issuer + '/userinfo',
         connect: function (provider) {
-          return provider + '/connect/' + provider + '?' + encodedParams;
+          return issuer + '/connect/' + provider + '?' + encodedParams;
         }
       };
 
