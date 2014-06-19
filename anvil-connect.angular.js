@@ -16,7 +16,9 @@ angular.module('anvil', [])
      * Provider configuration
      */
 
-    this.configure = function (issuer, options) {
+    this.configure = function (iss, options) {
+
+      issuer = iss;
 
       params = {
         response_type:  options.response_type || 'id_token token',
@@ -99,9 +101,9 @@ angular.module('anvil', [])
 
         uri: function (endpoint) {
           return issuer + '/'
-               + endpoint || 'authorize' + '?'
+               + (endpoint || 'authorize') + '?'
                + encodedParams
-               + '&nonce=' + his.nonce()
+               + '&nonce=' + this.nonce()
                ;
         },
 

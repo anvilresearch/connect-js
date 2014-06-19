@@ -100,6 +100,14 @@ describe('Anvil', function () {
   });
 
 
+  describe('uri', function () {
+    it('should return an authorize uri by default', function () {
+      expect(Anvil.uri('signup')).toContain(issuer)
+      expect(Anvil.uri()).toContain('&nonce=')
+    });
+  });
+
+
   describe('nonce', function () {
 
     var nonce;
