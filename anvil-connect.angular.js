@@ -88,10 +88,55 @@ angular.module('anvil', [])
        */
 
       return {
+
+
         urls: urls,
+
+
+        /**
+         * Quick and dirty uri method with nonce
+         */
+
+        uri: function (endpoint) {
+          return issuer + '/'
+               + endpoint || 'authorize' + '?'
+               + encodedParams
+               + '&nonce=' + his.nonce()
+               ;
+        },
+
+
+        /**
+         * Create or verify a nonce
+         */
+
+        nonce: function (nonce) {
+          if (nonce) {
+            return (this.sha256url(localStorage['nonce']) === nonce);
+          } else {
+            localStorage['nonce'] = Math.random().toString(36).substr(2, 10);
+            return this.sha256url(localStorage['nonce']);
+          }
+        },
+
+
+        /**
+         * Base64url encode a SHA256 hash of the input string
+         */
+
+        sha256url: function (str) {
+          return sjcl.codec.base64url.fromBits(sjcl.hash.sha256.hash(str));
+        },
+
+
+        /**
+         * Parse uri fragment response from Anvil Connect
+         */
+
         response: function () {
           return parseFormUrlEncoded($location.hash());
         }
+
       }
 
       /**

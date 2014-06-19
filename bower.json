@@ -28,5 +28,8 @@
   "devDependencies": {
     "angular": "~1.2.18",
     "angular-mocks": "~1.2.18"
+  },
+  "dependencies": {
+    "sjcl": "~1.0.0"
   }
 }

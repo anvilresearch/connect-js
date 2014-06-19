@@ -100,7 +100,31 @@ describe('Anvil', function () {
   });
 
 
-  describe('callback', function () {
+  describe('nonce', function () {
+
+    var nonce;
+
+    beforeEach(function () {
+      delete localStorage['nonce'];
+      nonce = Anvil.nonce()
+    });
+
+    it('should save a random value in localStorage', function () {
+      expect(localStorage['nonce'].length).toBe(10);
+    });
+
+    it('should compute a base64url encoded sha256 hash of the nonce', function () {
+      expect(nonce.length).toEqual(43);
+    });
+
+    it('should verify the most recent nonce', function () {
+      expect(Anvil.nonce(nonce)).toBe(true);
+    });
+
+  });
+
+
+  describe('response', function () {
 
     beforeEach(inject(function ($location) {
       $location.hash('error=access_denied&error_description=test')
