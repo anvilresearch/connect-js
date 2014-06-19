@@ -9,7 +9,7 @@ angular.module('anvil', [])
      * Private state
      */
 
-    var issuer, params, encodedParams, urls = {};
+    var issuer, params, encodedParams, display, urls = {};
 
 
     /**
@@ -40,9 +40,12 @@ angular.module('anvil', [])
         }
       };
 
+      display        = options.display || 'page';
+
       this.issuer    = issuer;
       this.params    = params;
       this.urls      = urls;
+      this.display   = display;
 
     };
 
@@ -82,7 +85,7 @@ angular.module('anvil', [])
     }
 
 
-    this.$get = ['$location', function ($location) {
+    this.$get = ['$location', '$window', function ($location, $window) {
 
 
       /**
@@ -91,6 +94,22 @@ angular.module('anvil', [])
 
       return {
 
+        /**
+         * Signin
+         */
+
+        signin: function () {
+          if (display === 'page') {
+            $window.location = this.uri();
+          } else if (display === 'popup') {
+            $window.open(this.uri(), 'signin', 'width=500, height=600');
+          }
+        },
+
+
+        /**
+         * Urls
+         */
 
         urls: urls,
 
