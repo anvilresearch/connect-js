@@ -146,13 +146,13 @@ describe('Anvil', function () {
   });
 
 
-  describe('signin with page display', function () {
+  describe('authorize with page display', function () {
 
     it('should navigate to the authorization server');
 
   });
 
-  describe('signin with popup display', function () {
+  describe('authorize with popup display', function () {
 
     it('should open a new window');
 

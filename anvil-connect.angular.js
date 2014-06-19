@@ -85,7 +85,7 @@ angular.module('anvil', [])
     }
 
 
-    this.$get = ['$location', '$window', function ($location, $window) {
+    this.$get = ['$q', '$location', '$window', function ($q, $location, $window) {
 
 
       /**
@@ -98,11 +98,48 @@ angular.module('anvil', [])
          * Signin
          */
 
-        signin: function () {
-          if (display === 'page') {
-            $window.location = this.uri();
-          } else if (display === 'popup') {
-            $window.open(this.uri(), 'signin', 'width=500, height=600');
+        authorize: function (authorization) {
+          // handle the auth response
+          if (authorization) {
+            var deferred = $q.defer()
+              , response = parseFormUrlEncoded($location.hash())
+              ;
+
+            console.log($location.hash(), response)
+            // handle authorization error
+            if (response.error) {
+              deferred.reject(response);
+              console.log('ERROR', response)
+              // clear localStorage/cookie?
+            }
+
+            // handle successful authorization
+            else {
+              // TODO:
+              // - verify id token
+              // - verify access token (athash claim)
+              // - request userInfo
+              // - store tokens and userinfo encrypted in localstorage
+              // - set cookie
+              // - expose userinfo as a property of the service
+              deferred.resolve(response);
+              console.log('RESPONSE', response);
+            }
+
+            return deferred.promise;
+          }
+
+          // initiate the auth flow
+          else {
+            // open the signin page in a popup window
+            if (display === 'popup') {
+              $window.open(this.uri(), 'authorize', 'width=500, height=600');
+            }
+
+            // navigate the current window to the provider
+            else {
+              $window.location = this.uri();
+            }
           }
         },
 
