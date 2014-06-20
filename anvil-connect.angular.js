@@ -86,23 +86,8 @@ angular.module('anvil', [])
 
 
     /**
-     * Deserialize session
+     * Factory
      */
-
-    //function deserializeSession () {
-    //  var re, secret, json, session
-    //  try {
-    //    re      = new RegExp('[; ]anvil.connect=([^\\s;]*)');
-    //    secret  = document.cookie.match(re).pop();
-    //    json    = sjcl.decrypt(secret, localStorage['anvil.connect']);
-    //    session = JSON.parse(json);
-    //  } catch (e) {}
-    //  return session;
-    //}
-
-
-
-
 
     this.$get = [
       '$q',
@@ -324,6 +309,18 @@ angular.module('anvil', [])
             $window.location = this.uri();
           }
         }
+      };
+
+
+      /**
+       * Signout
+       */
+
+      Anvil.signout = function () {
+        Anvil.session = session = {};
+        document.cookie = 'anvil.connect=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        delete localStorage['anvil.connect'];
+        // what about signing out of the auth server?
       };
 
 
