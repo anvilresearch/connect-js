@@ -133,6 +133,7 @@ angular.module('anvil', [])
             else {
               // TODO:
               // - verify id token
+              // - verify nonce
               // - verify access token (athash claim)
               // - request userInfo
               // - store userInfo in localStorage session
@@ -221,6 +222,21 @@ angular.module('anvil', [])
 
         response: function () {
           return parseFormUrlEncoded($location.hash());
+        },
+
+
+        /**
+         * Headers
+         */
+
+        headers: function (headers) {
+          if (this.session.access_token) {
+            return angular.extend(headers, {
+              'Authorization': 'Bearer ' + this.session.access_token
+            });
+          } else {
+            return headers;
+          }
         }
 
       }
