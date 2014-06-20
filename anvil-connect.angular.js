@@ -140,24 +140,30 @@ angular.module('anvil', [])
               // - verify id token
               // - verify nonce
               // - verify access token (athash claim)
-              // - request userInfo
-              // - store userInfo in localStorage session
               // - expose userinfo as a property of the service
 
-              this.session = response;
 
-              var now = new Date()
-                , time = now.getTime()
-                , exp = time + (response.expires_in || 3600) * 1000
-                , secret = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(Math.random().toString(36).substr(2, 10)))
-                ;
+              this.session = session = response;
 
-              now.setTime(exp);
-              document.cookie = 'anvil.connect=' + secret + '; expires=' + now.toUTCString();
-              session = sjcl.encrypt(secret, JSON.stringify(response));
-              console.log('NEW SESSION', session)
-              localStorage['anvil.connect'] = session;
-              deferred.resolve(response);
+              this.userInfo().then(
+                function userInfoSuccess (userInfo) {
+                  session.userInfo = userInfo;
+
+                  var now = new Date()
+                    , time = now.getTime()
+                    , exp = time + (response.expires_in || 3600) * 1000
+                    , secret = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(Math.random().toString(36).substr(2, 10)))
+                    ;
+
+                  now.setTime(exp);
+                  document.cookie = 'anvil.connect=' + secret + '; expires=' + now.toUTCString();
+                  session = sjcl.encrypt(secret, JSON.stringify(response));
+                  console.log('NEW SESSION', session)
+                  localStorage['anvil.connect'] = session;
+                  deferred.resolve(response);
+                },
+                function userInfoFailure () {}
+              );
             }
 
             return deferred.promise;
