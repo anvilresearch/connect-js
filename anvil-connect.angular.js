@@ -85,7 +85,22 @@ angular.module('anvil', [])
     }
 
 
-    this.$get = ['$q', '$location', '$window', function ($q, $location, $window) {
+    this.$get = ['$q', '$location', '$document', '$window', function ($q, $location, $document, $window) {
+
+
+      function decryptSession () {
+        var re, secret, json, session
+        try {
+          re      = new RegExp('[; ]anvil.connect=([^\\s;]*)');
+          secret  = document.cookie.match(re).pop();
+          json    = sjcl.decrypt(secret, localStorage['anvil.connect']);
+          session = JSON.parse(json);
+        } catch (e) {}
+        console.log('DECRYPTED SESSION', session);
+        return session;
+      }
+
+      var session = decryptSession();
 
 
       /**
@@ -93,6 +108,8 @@ angular.module('anvil', [])
        */
 
       return {
+
+        session: session || {},
 
         /**
          * Signin
@@ -105,7 +122,6 @@ angular.module('anvil', [])
               , response = parseFormUrlEncoded($location.hash())
               ;
 
-            console.log($location.hash(), response)
             // handle authorization error
             if (response.error) {
               deferred.reject(response);
@@ -119,11 +135,23 @@ angular.module('anvil', [])
               // - verify id token
               // - verify access token (athash claim)
               // - request userInfo
-              // - store tokens and userinfo encrypted in localstorage
-              // - set cookie
+              // - store userInfo in localStorage session
               // - expose userinfo as a property of the service
+
+              this.session = response;
+
+              var now = new Date()
+                , time = now.getTime()
+                , exp = time + (response.expires_in || 3600) * 1000
+                , secret = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(Math.random().toString(36).substr(2, 10)))
+                ;
+
+              now.setTime(exp);
+              document.cookie = 'anvil.connect=' + secret + '; expires=' + now.toUTCString();
+              session = sjcl.encrypt(secret, JSON.stringify(response));
+              console.log('NEW SESSION', session)
+              localStorage['anvil.connect'] = session;
               deferred.resolve(response);
-              console.log('RESPONSE', response);
             }
 
             return deferred.promise;
