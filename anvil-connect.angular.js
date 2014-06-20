@@ -85,7 +85,12 @@ angular.module('anvil', [])
     }
 
 
-    this.$get = ['$q', '$location', '$document', '$window', function ($q, $location, $document, $window) {
+    this.$get = [
+      '$q',
+      '$http',
+      '$location',
+      '$document',
+      '$window', function ($q, $http, $location, $document, $window) {
 
 
       function decryptSession () {
@@ -231,12 +236,47 @@ angular.module('anvil', [])
 
         headers: function (headers) {
           if (this.session.access_token) {
-            return angular.extend(headers, {
+            return angular.extend(headers || {}, {
               'Authorization': 'Bearer ' + this.session.access_token
             });
           } else {
             return headers;
           }
+        },
+
+
+        /**
+         * Request
+         */
+
+        request: function (config) {
+          var deferred = $q.defer();
+
+          config.headers = this.headers(config.headers);
+
+          function success (response) {
+            deferred.resolve(response.data);
+          }
+
+          function failure (fault) {
+            deferred.reject(fault);
+          }
+
+          $http(config).then(success, failure);
+
+          return deferred.promise;
+        },
+
+
+        /**
+         * UserInfo
+         */
+
+        userInfo: function () {
+          return this.request({
+            method: 'GET',
+            url: this.urls.userinfo
+          });
         }
 
       }
@@ -245,12 +285,12 @@ angular.module('anvil', [])
        * OAuth Request
        */
 
-      //function OAuth (config) {
+      //function oauth (config) {
       //  var deferred = $q.defer();
 
       //  if (!config.headers) { config.headers = {} }
-      //  config.headers['Authorization'] = 'Bearer '
-      //                                  + OAuth.credentials.access_token
+      //  config.headers['authorization'] = 'bearer '
+      //                                  + oauth.credentials.access_token
       //                                  ;
 
       //  function success (response) {
