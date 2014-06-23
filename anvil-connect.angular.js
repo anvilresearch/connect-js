@@ -85,6 +85,9 @@ angular.module('anvil', [])
     }
 
 
+
+
+
     /**
      * Factory
      */
@@ -95,6 +98,63 @@ angular.module('anvil', [])
       '$location',
       '$document',
       '$window', function ($q, $http, $location, $document, $window) {
+
+
+      /**
+       * Configure the authorize popup window
+       * Adapted from dropbox-js for ngDropbox
+       */
+
+      function popupSize(popupWidth, popupHeight) {
+        var x0, y0, width, height, popupLeft, popupTop;
+
+        // Metrics for the current browser window.
+        x0 = $window.screenX || $window.screenLeft
+        y0 = $window.screenY || $window.screenTop
+        width = $window.outerWidth || $document.documentElement.clientWidth
+        height = $window.outerHeight || $document.documentElement.clientHeight
+
+        // Computed popup window metrics.
+        popupLeft = Math.round(x0) + (width - popupWidth) / 2
+        popupTop = Math.round(y0) + (height - popupHeight) / 2.5
+        if (popupLeft < x0) { popupLeft = x0 }
+        if (popupTop < y0) { popupTop = y0 }
+
+        return 'width=' + popupWidth + ',height=' + popupHeight + ',' +
+               'left=' + popupLeft + ',top=' + popupTop + ',' +
+               'dialog=yes,dependent=yes,scrollbars=yes,location=yes';
+      }
+
+
+      /**
+       * Parse credentials from Anvil Connect authorize callback
+       * Adapted from dropbox-js for ngDropbox
+       */
+
+      function queryParamsFromUrl(url) {
+        var match = /^[^?#]+(\?([^\#]*))?(\#(.*))?$/.exec(url);
+        if (!match) { return {}; }
+
+        var query = match[2] || ''
+          , fragment = match[4] || ''
+          , fragmentOffset = fragment.indexOf('?')
+          , params = {}
+          ;
+
+        if (fragmentOffset !== -1) {
+          fragment = fragment.substring(fragmentOffset + 1);
+        }
+
+        var kvp = query.split('&').concat(fragment.split('&'));
+        kvp.forEach(function (kv) {
+          var offset = kv.indexOf('=');
+          if (offset === -1) { return; }
+          params[decodeURIComponent(kv.substring(0, offset))] =
+                 decodeURIComponent(kv.substring(offset + 1));
+        });
+
+        return params;
+      }
 
 
       var Anvil = {};
@@ -251,57 +311,73 @@ angular.module('anvil', [])
 
 
       /**
+       * Callback
+       */
+
+      Anvil.callback = function (response) {
+        var deferred = $q.defer();
+
+        if (response.error) {
+          // clear localStorage/cookie/etc
+          deferred.reject(response);
+        }
+
+        else {
+          // TODO:
+          // - verify id token
+          // - verify nonce
+          // - verify access token (athash claim)
+          // - expose userinfo as a property of the service
+
+          Anvil.session = session = response;
+
+          Anvil.userInfo().then(
+            function userInfoSuccess (userInfo) {
+              Anvil.session.userInfo = userInfo;
+              Anvil.serialize();
+              deferred.resolve(session);
+            },
+
+            function userInfoFailure () {}
+          );
+
+          deferred.resolve()
+        }
+
+        return deferred.promise;
+      };
+
+
+      /**
        * Authorize
        */
 
-      Anvil.authorize = function (authorization) {
+      Anvil.authorize = function () {
         // handle the auth response
-        if (authorization) {
-          var deferred = $q.defer()
-            , response = parseFormUrlEncoded($location.hash())
-            ;
-
-          // handle authorization error
-          if (response.error) {
-            deferred.reject(response);
-            console.log('ERROR', response)
-            // clear localStorage/cookie?
-          }
-
-          // handle successful authorization
-          else {
-            // TODO:
-            // - verify id token
-            // - verify nonce
-            // - verify access token (athash claim)
-            // - expose userinfo as a property of the service
-
-
-            Anvil.session = session = response;
-
-            Anvil.userInfo().then(
-
-              function userInfoSuccess (userInfo) {
-                Anvil.session.userInfo = userInfo;
-                Anvil.serialize();
-                deferred.resolve(session);
-              },
-
-              function userInfoFailure () {
-
-              }
-
-            );
-          }
-
-          return deferred.promise;
+        if ($location.hash()) {
+          return Anvil.callback(parseFormUrlEncoded($location.hash()));
         }
 
         // initiate the auth flow
         else {
           // open the signin page in a popup window
           if (display === 'popup') {
-            $window.open(this.uri(), 'authorize', 'width=500, height=600');
+            var deferred = $q.defer();
+
+
+            var listener = function listener (event) {
+              Anvil.callback(queryParamsFromUrl(event.data)).then(
+                  function (result) { deferred.resolve(result); },
+                  function (fault) { deferred.reject(fault); }
+              );
+              $window.removeEventListener('message', listener, false);
+            }
+
+
+            $window.addEventListener('message', listener, false);
+            $window.open(this.uri(), 'anvil', popupSize(700, 500));
+
+            return deferred.promise;
           }
 
           // navigate the current window to the provider
