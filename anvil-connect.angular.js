@@ -9,83 +9,25 @@ angular.module('anvil', [])
      * Private state
      */
 
-    var issuer, params, encodedParams, display, urls = {}, session = {};
+    var issuer, params, display, session = {};
 
 
     /**
      * Provider configuration
      */
 
-    this.configure = function (iss, options) {
-
-      issuer = iss;
-
-      params = {
-        response_type:  options.response_type || 'id_token token',
-        client_id:      options.client_id,
-        redirect_uri:   options.redirect_uri,
-        scope:          ['openid', 'profile'].concat(options.scope || []).join(' '),
-        // other
-      };
-
-      encodedParams = toFormUrlEncoded(params),
-
-      urls = {
-        authorize:  issuer + '/authorize?' + encodedParams,
-        signin:     issuer + '/signin?'    + encodedParams,
-        signup:     issuer + '/signup?'    + encodedParams,
-        userinfo:   issuer + '/userinfo',
-        connect: function (provider) {
-          return issuer + '/connect/' + provider + '?' + encodedParams;
-        }
-      };
-
-      display        = options.display || 'page';
-
-      this.issuer    = issuer;
-      this.params    = params;
-      this.urls      = urls;
-      this.display   = display;
-
+    this.configure = function (options) {
+      this.issuer = issuer = options.issuer;
+      this.params = params = {};
+      this.params.response_type = options.response_type || 'id_token token';
+      this.params.client_id = options.client_id;
+      this.params.redirect_uri = options.redirect_uri;
+      this.params.scope = [
+        'openid',
+        'profile'
+      ].concat(options.scope).join(' ');
+      this.display = display = options.display || 'page';
     };
-
-
-    /**
-     * Form Urlencode an object
-     */
-
-    function toFormUrlEncoded (obj) {
-      var pairs = [];
-
-      Object.keys(obj).forEach(function (key) {
-        pairs.push(key + '=' + obj[key]);
-      });
-
-      return pairs.join('&');
-    }
-
-
-    /**
-     * Parse Form Urlencoded data
-     */
-
-    function parseFormUrlEncoded (str) {
-      var obj = {};
-
-      str.split('&').forEach(function (property) {
-        var pair = property.split('=')
-          , key  = pair[0]
-          , val  = pair[1]
-          ;
-
-        obj[key] = val;
-      });
-
-      return obj;
-    }
-
-
-
 
 
     /**
@@ -101,11 +43,68 @@ angular.module('anvil', [])
 
 
       /**
+       * Service
+       */
+
+      var Anvil = {};
+
+
+      /**
+       * Form Urlencode an object
+       */
+
+      function toFormUrlEncoded (obj) {
+        var pairs = [];
+
+        Object.keys(obj).forEach(function (key) {
+          pairs.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
+        });
+
+        return pairs.join('&');
+      }
+
+      Anvil.toFormUrlEncoded = toFormUrlEncoded;
+
+
+      /**
+       * Parse Form Urlencoded data
+       */
+
+      function parseFormUrlEncoded (str) {
+        var obj = {};
+
+        str.split('&').forEach(function (property) {
+          var pair = property.split('=')
+            , key  = decodeURIComponent(pair[0])
+            , val  = decodeURIComponent(pair[1])
+            ;
+
+          obj[key] = val;
+        });
+
+        return obj;
+      }
+
+      Anvil.parseFormUrlEncoded = parseFormUrlEncoded;
+
+
+      /**
+       * Get URI Fragment
+       */
+
+      function getUrlFragment (url) {
+        return url.split('#').pop();
+      }
+
+      Anvil.getUrlFragment = getUrlFragment;
+
+
+      /**
        * Configure the authorize popup window
        * Adapted from dropbox-js for ngDropbox
        */
 
-      function popupSize(popupWidth, popupHeight) {
+      function popup (popupWidth, popupHeight) {
         var x0, y0, width, height, popupLeft, popupTop;
 
         // Metrics for the current browser window.
@@ -125,39 +124,8 @@ angular.module('anvil', [])
                'dialog=yes,dependent=yes,scrollbars=yes,location=yes';
       }
 
+      Anvil.popup = popup;
 
-      /**
-       * Parse credentials from Anvil Connect authorize callback
-       * Adapted from dropbox-js for ngDropbox
-       */
-
-      function queryParamsFromUrl(url) {
-        var match = /^[^?#]+(\?([^\#]*))?(\#(.*))?$/.exec(url);
-        if (!match) { return {}; }
-
-        var query = match[2] || ''
-          , fragment = match[4] || ''
-          , fragmentOffset = fragment.indexOf('?')
-          , params = {}
-          ;
-
-        if (fragmentOffset !== -1) {
-          fragment = fragment.substring(fragmentOffset + 1);
-        }
-
-        var kvp = query.split('&').concat(fragment.split('&'));
-        kvp.forEach(function (kv) {
-          var offset = kv.indexOf('=');
-          if (offset === -1) { return; }
-          params[decodeURIComponent(kv.substring(0, offset))] =
-                 decodeURIComponent(kv.substring(offset + 1));
-        });
-
-        return params;
-      }
-
-
-      var Anvil = {};
 
       /**
        * Session object
@@ -170,26 +138,31 @@ angular.module('anvil', [])
        * Serialize session
        */
 
-      Anvil.serialize = function () {
+      function serialize () {
         var now = new Date()
           , time = now.getTime()
           , exp = time + (Anvil.session.expires_in || 3600) * 1000
-          , secret = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(Math.random().toString(36).substr(2, 10)))
+          , random = Math.random().toString(36).substr(2, 10)
+          , secret = sjcl.codec.hex.fromBits(sjcl.hash.sha256.hash(random))
           ;
 
         now.setTime(exp);
-        document.cookie = 'anvil.connect=' + secret + '; expires=' + now.toUTCString();
+        document.cookie = 'anvil.connect=' + secret
+                        + '; expires=' + now.toUTCString();
+
         var encrypted = sjcl.encrypt(secret, JSON.stringify(Anvil.session));
         localStorage['anvil.connect'] = encrypted;
         console.log('SERIALIZED', encrypted);
       };
+
+      Anvil.serialize = serialize;
 
 
       /**
        * Deserialize session
        */
 
-      Anvil.deserialize = function () {
+      function deserialize () {
         var re, secret, json, parsed;
 
         try {
@@ -203,68 +176,74 @@ angular.module('anvil', [])
           console.log('Cannot deserialize session data');
         }
 
-        Anvil.session = session = parsed;
+        Anvil.session = session = parsed || {};
         console.log('DESERIALIZED', session);
       };
 
+      Anvil.deserialize = deserialize;
+
 
       /**
-       * Urls
+       * Reset
        */
 
-      Anvil.urls = urls;
+      function reset () {
+        Anvil.session = session = {};
+        document.cookie = 'anvil.connect=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        delete localStorage['anvil.connect'];
+        // what about signing out of the auth server?
+      };
+
+      Anvil.reset = reset;
 
 
       /**
        * Quick and dirty uri method with nonce
        */
 
-      Anvil.uri = function (endpoint) {
+      function uri (endpoint) {
         return issuer + '/'
              + (endpoint || 'authorize') + '?'
-             + encodedParams
-             + '&nonce=' + this.nonce()
-             ;
+             + toFormUrlEncoded(angular.extend({}, params, {
+                nonce: this.nonce()
+               }));
       };
+
+      Anvil.uri = uri;
 
 
       /**
        * Create or verify a nonce
        */
 
-      Anvil.nonce = function (nonce) {
+      function nonce (nonce) {
         if (nonce) {
-          return (this.sha256url(localStorage['nonce']) === nonce);
+          return (Anvil.sha256url(localStorage['nonce']) === nonce);
         } else {
           localStorage['nonce'] = Math.random().toString(36).substr(2, 10);
           return this.sha256url(localStorage['nonce']);
         }
       };
 
+      Anvil.nonce = nonce;
+
 
       /**
        * Base64url encode a SHA256 hash of the input string
        */
 
-      Anvil.sha256url = function (str) {
+      function sha256url (str) {
         return sjcl.codec.base64url.fromBits(sjcl.hash.sha256.hash(str));
       };
 
-
-      /**
-       * Parse uri fragment response from Anvil Connect
-       */
-
-      Anvil.response = function () {
-        return parseFormUrlEncoded($location.hash());
-      };
+      Anvil.sha256url = sha256url;
 
 
       /**
        * Headers
        */
 
-      Anvil.headers = function (headers) {
+      function headers (headers) {
         if (this.session.access_token) {
           return angular.extend(headers || {}, {
             'Authorization': 'Bearer ' + this.session.access_token
@@ -274,12 +253,14 @@ angular.module('anvil', [])
         }
       };
 
+      Anvil.headers = headers;
+
 
       /**
        * Request
        */
 
-      Anvil.request = function (config) {
+      function request (config) {
         var deferred = $q.defer();
 
         config.headers = this.headers(config.headers);
@@ -290,6 +271,7 @@ angular.module('anvil', [])
 
         function failure (fault) {
           deferred.reject(fault);
+          console.log(fault)
         }
 
         $http(config).then(success, failure);
@@ -297,28 +279,33 @@ angular.module('anvil', [])
         return deferred.promise;
       };
 
+      Anvil.request = request;
+
 
       /**
        * UserInfo
        */
 
-      Anvil.userInfo = function () {
+      function userInfo () {
         return this.request({
           method: 'GET',
-          url: this.urls.userinfo
+          url: issuer + '/userinfo'
         });
       };
+
+      Anvil.userInfo = userInfo;
 
 
       /**
        * Callback
        */
 
-      Anvil.callback = function (response) {
+      function callback (response) {
         var deferred = $q.defer();
 
         if (response.error) {
           // clear localStorage/cookie/etc
+          Anvil.reset()
           deferred.reject(response);
         }
 
@@ -327,7 +314,6 @@ angular.module('anvil', [])
           // - verify id token
           // - verify nonce
           // - verify access token (athash claim)
-          // - expose userinfo as a property of the service
 
           Anvil.session = session = response;
 
@@ -347,12 +333,14 @@ angular.module('anvil', [])
         return deferred.promise;
       };
 
+      Anvil.callback = callback;
+
 
       /**
        * Authorize
        */
 
-      Anvil.authorize = function () {
+      function authorize () {
         // handle the auth response
         if ($location.hash()) {
           return Anvil.callback(parseFormUrlEncoded($location.hash()));
@@ -366,7 +354,8 @@ angular.module('anvil', [])
 
 
             var listener = function listener (event) {
-              Anvil.callback(queryParamsFromUrl(event.data)).then(
+              var fragment = getUrlFragment(event.data);
+              Anvil.callback(parseFormUrlEncoded(fragment)).then(
                   function (result) { deferred.resolve(result); },
                   function (fault) { deferred.reject(fault); }
               );
@@ -375,7 +364,7 @@ angular.module('anvil', [])
 
 
             $window.addEventListener('message', listener, false);
-            $window.open(this.uri(), 'anvil', popupSize(700, 500));
+            $window.open(this.uri(), 'anvil', popup(700, 500));
 
             return deferred.promise;
           }
@@ -387,17 +376,19 @@ angular.module('anvil', [])
         }
       };
 
+      Anvil.authorize = authorize;
+
 
       /**
        * Signout
        */
 
-      Anvil.signout = function () {
-        Anvil.session = session = {};
-        document.cookie = 'anvil.connect=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        delete localStorage['anvil.connect'];
-        // what about signing out of the auth server?
-      };
+      function signout () {
+        // auth server should support a signout flow as well
+        return Anvil.reset();
+      }
+
+      Anvil.signout = signout;
 
 
       /**
