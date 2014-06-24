@@ -37,8 +37,8 @@ angular.module('App', ['...', 'anvil'])
     AnvilProvider.configure({
       issuer:       'http://localhost:3000',
       client_id:    '<CLIENT_ID>',
-      redirect_uri: '<ISSUER>/callback.html',
-      display: 'popup'
+      redirect_uri: '<YOUR_APP_HOST>/callback.html',
+      display:      'popup'
     });
 
     // ...
@@ -69,7 +69,7 @@ angular.module('App', ['...', 'anvil'])
     AnvilProvider.configure({
       issuer:       'http://localhost:3000',
       client_id:    '<CLIENT_ID>',
-      redirect_uri: '<ISSUER>/callback',
+      redirect_uri: '<YOUR_APP_HOST>/callback',
       // `display` defaults to "page"
     });
 
