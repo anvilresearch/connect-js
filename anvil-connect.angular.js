@@ -324,10 +324,10 @@ angular.module('anvil', [])
               deferred.resolve(session);
             },
 
-            function userInfoFailure () {}
+            function userInfoFailure () {
+              deferred.reject('Retrieving user info from server failed.');
+            }
           );
-
-          deferred.resolve()
         }
 
         return deferred.promise;
