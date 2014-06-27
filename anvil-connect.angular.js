@@ -384,8 +384,8 @@ angular.module('anvil', [])
        */
 
       function signout () {
-        // auth server should support a signout flow as well
-        return Anvil.reset();
+        Anvil.reset()
+        $window.location = issuer + '/signout?redirect_uri=' + $window.location.href;
       }
 
       Anvil.signout = signout;
