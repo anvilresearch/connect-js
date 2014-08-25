@@ -30,6 +30,8 @@
     "angular-mocks": "~1.2.18"
   },
   "dependencies": {
-    "sjcl": "~1.0.0"
+    "sjcl": "~1.0.0",
+    "jsrsasign": "~4.7.0",
+    "jsjws": "~3.0.2"
   }
 }

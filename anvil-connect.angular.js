@@ -9,7 +9,7 @@ angular.module('anvil', [])
      * Private state
      */
 
-    var issuer, params, display, session = {};
+    var issuer, pubkey, params, display, session = {};
 
 
     /**
@@ -18,6 +18,7 @@ angular.module('anvil', [])
 
     this.configure = function (options) {
       this.issuer = issuer = options.issuer;
+      this.pubkey = pubkey = options.pubkey;
       this.params = params = {};
       this.params.response_type = options.response_type || 'id_token token';
       this.params.client_id = options.client_id;
@@ -310,6 +311,26 @@ angular.module('anvil', [])
         }
 
         else {
+
+          var accessJWS = new KJUR.jws.JWS();
+          var idJWS = new KJUR.jws.JWS();
+
+          try {
+            accessJWS.verifyJWSByPemX509Cert(response.access_token, pubkey)
+          } catch (e) {}
+
+          try {
+            response.access_claims = JSON.parse(accessJWS.parsedJWS.payloadS)
+          } catch (e) {}
+
+          try {
+            idJWS.verifyJWSByPemX509Cert(response.id_token, pubkey)
+          } catch (e) {}
+
+          try {
+            response.id_claims = JSON.parse(idJWS.parsedJWS.payloadS)
+          } catch (e) {}
+
           // TODO:
           // - verify id token
           // - verify nonce
