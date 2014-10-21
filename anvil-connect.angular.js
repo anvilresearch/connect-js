@@ -18,7 +18,7 @@ angular.module('anvil', [])
 
     this.configure = function (options) {
       this.issuer = issuer = options.issuer;
-      this.pubkey = pubkey = options.pubkey;
+      this.pubkey = pubkey = KEYUTIL.getKey(options.pubkey);
       this.params = params = {};
       this.params.response_type = options.response_type || 'id_token token';
       this.params.client_id = options.client_id;
@@ -315,25 +315,49 @@ angular.module('anvil', [])
           var accessJWS = new KJUR.jws.JWS();
           var idJWS = new KJUR.jws.JWS();
 
-          try {
-            accessJWS.verifyJWSByPemX509Cert(response.access_token, pubkey)
-          } catch (e) {}
+
+          //var jwk = {
+          //  "kty":"RSA",
+          //  "use":"sig",
+          //  "alg":"RS256",
+          //  "n":"AJ4bmyK/fLoEMPuiR6uHOWlhjJRQFPunVxWHsG8uwPneJmPxCGPbboyVlCGtD1xsfHtygIu7zhfNbb1AiHW5pc3bi1k8udM3CHQUTuneudNtMkIODGm/pTV3nQ1TH1tr9ebquT360DTEhkmjv/5LZwsnOA0HAf/3GG9fu8gl55mhpKnyhWpkbrHryuh8cx8hUzLwi5Rr5gA1IrhQP9SFX2y68suSS0wp7HoQTIie6EXy/G2OJi7kqJS0UjkXK7ZPqf56OGBm+TlYBmwyXdWZ3bBglnlPjBb67exSMiXmi+yeeFa52tWLZlOqNf6CWb2XrNf6PWCxt0NZ7V3HPOrjOmM=",
+          //  "e":"AQAB"
+          //};
+
+          //var hN = b64tohex(jwk.n)
+          //var hE = b64tohex(jwk.e)
+          //console.log('Access Token', accessJWS)
+          //console.log('hN', hN)
+          //console.log('hE', hE)
+
+
+          if (!accessJWS.verifyJWSByKey(response.access_token, pubkey)) {
+          //if (!accessJWS.verifyJWSByNE(response.access_token, hN, hE)) {
+            deferred.reject('Failed to verify access token signature.')
+          }
+
+          if (!idJWS.verifyJWSByKey(response.id_token, pubkey)) {
+            deferred.reject('Failed to verify id token signature.')
+          }
 
           try {
             response.access_claims = JSON.parse(accessJWS.parsedJWS.payloadS)
-          } catch (e) {}
-
-          try {
-            idJWS.verifyJWSByPemX509Cert(response.id_token, pubkey)
-          } catch (e) {}
+          } catch (e) {
+            deferred.reject("Can't parse access token payload.");
+          }
 
           try {
             response.id_claims = JSON.parse(idJWS.parsedJWS.payloadS)
-          } catch (e) {}
+          } catch (e) {
+            deferred.reject("Can't parse id token payload.");
+          }
+
+
+          if (!nonce(response.id_claims.nonce)) {
+            deferred.reject('Invalid nonce.');
+          }
 
           // TODO:
-          // - verify id token
-          // - verify nonce
           // - verify access token (athash claim)
 
           Anvil.session = session = response;
@@ -375,12 +399,14 @@ angular.module('anvil', [])
 
 
             var listener = function listener (event) {
-              var fragment = getUrlFragment(event.data);
-              Anvil.callback(parseFormUrlEncoded(fragment)).then(
-                  function (result) { deferred.resolve(result); },
-                  function (fault) { deferred.reject(fault); }
-              );
-              $window.removeEventListener('message', listener, false);
+              if (event.data !== '__ready__') {
+                var fragment = getUrlFragment(event.data);
+                Anvil.callback(parseFormUrlEncoded(fragment)).then(
+                    function (result) { deferred.resolve(result); },
+                    function (fault) { deferred.reject(fault); }
+                );
+                $window.removeEventListener('message', listener, false);
+              }
             }
 
 
