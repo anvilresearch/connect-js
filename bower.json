@@ -32,6 +32,7 @@
   "dependencies": {
     "sjcl": "~1.0.0",
     "jsrsasign": "~4.7.0",
-    "jsjws": "~3.0.2"
+    "jsjws": "~3.0.2",
+    "crypto-js": "http://crypto-js.googlecode.com/files/CryptoJS%20v3.1.2.zip"
   }
 }
