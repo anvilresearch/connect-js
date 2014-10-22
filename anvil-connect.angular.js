@@ -9,7 +9,7 @@ angular.module('anvil', [])
      * Private state
      */
 
-    var issuer, pubkey, params, display, session = {};
+    var issuer, jwk, hN, hE, pubkey, params, display, session = {};
 
 
     /**
@@ -18,7 +18,13 @@ angular.module('anvil', [])
 
     this.configure = function (options) {
       this.issuer = issuer = options.issuer;
-      this.pubkey = pubkey = KEYUTIL.getKey(options.pubkey);
+
+      if (options.jwk) {
+        this.jwk = jwk = options.jwk;
+        this.hN = hN = b64tohex(jwk.n);
+        this.hE = hE = b64tohex(jwk.e);
+      }
+
       this.params = params = {};
       this.params.response_type = options.response_type || 'id_token token';
       this.params.client_id = options.client_id;
@@ -315,45 +321,36 @@ angular.module('anvil', [])
           var accessJWS = new KJUR.jws.JWS();
           var idJWS = new KJUR.jws.JWS();
 
+          // NEED TO REVIEW THIS CODE FOR SANITY
 
-          //var jwk = {
-          //  "kty":"RSA",
-          //  "use":"sig",
-          //  "alg":"RS256",
-          //  "n":"AJ4bmyK/fLoEMPuiR6uHOWlhjJRQFPunVxWHsG8uwPneJmPxCGPbboyVlCGtD1xsfHtygIu7zhfNbb1AiHW5pc3bi1k8udM3CHQUTuneudNtMkIODGm/pTV3nQ1TH1tr9ebquT360DTEhkmjv/5LZwsnOA0HAf/3GG9fu8gl55mhpKnyhWpkbrHryuh8cx8hUzLwi5Rr5gA1IrhQP9SFX2y68suSS0wp7HoQTIie6EXy/G2OJi7kqJS0UjkXK7ZPqf56OGBm+TlYBmwyXdWZ3bBglnlPjBb67exSMiXmi+yeeFa52tWLZlOqNf6CWb2XrNf6PWCxt0NZ7V3HPOrjOmM=",
-          //  "e":"AQAB"
-          //};
-
-          //var hN = b64tohex(jwk.n)
-          //var hE = b64tohex(jwk.e)
-          //console.log('Access Token', accessJWS)
-          //console.log('hN', hN)
-          //console.log('hE', hE)
-
-
-          if (!accessJWS.verifyJWSByKey(response.access_token, pubkey)) {
-          //if (!accessJWS.verifyJWSByNE(response.access_token, hN, hE)) {
+          // Decode the access token and verify signature
+          if (response.access_token
+           && !accessJWS.verifyJWSByNE(response.access_token, hN, hE)) {
             deferred.reject('Failed to verify access token signature.')
           }
 
-          if (!idJWS.verifyJWSByKey(response.id_token, pubkey)) {
+          // Decode the id token and verify signature
+          if (response.id_token
+           && !idJWS.verifyJWSByNE(response.id_token, hN, hE)) {
             deferred.reject('Failed to verify id token signature.')
           }
 
+          // Parse the access token payload
           try {
             response.access_claims = JSON.parse(accessJWS.parsedJWS.payloadS)
           } catch (e) {
             deferred.reject("Can't parse access token payload.");
           }
 
+          // Parse the id token payload
           try {
             response.id_claims = JSON.parse(idJWS.parsedJWS.payloadS)
           } catch (e) {
             deferred.reject("Can't parse id token payload.");
           }
 
-
-          if (!nonce(response.id_claims.nonce)) {
+          // Validate the nonce
+          if (response.id_claims && !nonce(response.id_claims.nonce)) {
             deferred.reject('Invalid nonce.');
           }
 

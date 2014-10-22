@@ -17,6 +17,11 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'bower_components/sjcl/sjcl.js',
+      'bower_components/crypto-js/components/core.js',
+      'bower_components/crypto-js/components/sha1.js',
+      'bower_components/crypto-js/components/sha256.js',
+      'bower_components/crypto-js/components/x64-core.js',
+      'bower_components/crypto-js/components/sha512.js',
       'bower_components/jsrsasign/ext/base64.js',
       'bower_components/jsrsasign/ext/jsbn.js',
       'bower_components/jsrsasign/ext/jsnb2.js',
@@ -28,8 +33,9 @@ module.exports = function(config) {
       'bower_components/jsrsasign/x509-1.1.js',
       'bower_components/jsrsasign/crypto-1.1.js',
       'bower_components/jsrsasign/base64x-1.1.js',
+      'bower_components/jsrsasign/keyutil-1.0.js',
       'bower_components/jsjws/ext/json-sans-eval.js',
-      'bower_components/jsjws/jws-3.0.js',
+      'bower_components/jsjws/jws-2.0.js',
       'bower_components/angular/angular.js',
       'bower_components/angular-mocks/angular-mocks.js',
       'anvil-connect.angular.js',
