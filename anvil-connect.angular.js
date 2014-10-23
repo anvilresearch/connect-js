@@ -6,11 +6,38 @@ angular.module('anvil', [])
   .provider('Anvil', function AnvilProvider () {
 
     /**
+     * Reference to AnvilProvider
+     */
+
+    var provider = this;
+
+
+    /**
      * Private state
      */
 
     var issuer, jwk, hN, hE, pubkey, params, display, session = {};
 
+
+    /**
+     * Set JWK
+     */
+
+    function setJWK (jwks) {
+      if (!Array.isArray(jwks) && typeof jwks === 'object') {
+        jwks = [jwks];
+      }
+
+      if (Array.isArray(jwks)) {
+        jwks.forEach(function (key) {
+          if (key && key.use === 'sig') {
+            provider.jwk = jwk = jwks[0];
+            provider.hN = hN = b64tohex(jwk.n);
+            provider.hE = hE = b64tohex(jwk.e);
+          }
+        });
+      }
+    }
 
     /**
      * Provider configuration
@@ -19,11 +46,7 @@ angular.module('anvil', [])
     this.configure = function (options) {
       this.issuer = issuer = options.issuer;
 
-      if (options.jwk) {
-        this.jwk = jwk = options.jwk;
-        this.hN = hN = b64tohex(jwk.n);
-        this.hE = hE = b64tohex(jwk.e);
-      }
+      setJWK(options.jwk)
 
       this.params = params = {};
       this.params.response_type = options.response_type || 'id_token token';
@@ -443,6 +466,38 @@ angular.module('anvil', [])
       }
 
       Anvil.signout = signout;
+
+
+      /**
+       * Signing Key
+       */
+
+      function getKeys () {
+        var deferred = $q.defer();
+
+        function success (response) {
+          setJWK(response.data);
+          deferred.resolve(response.data)
+        }
+
+        function failure (fault) {
+          deferred.reject(fault);
+        }
+
+        $http({
+          method: 'GET',
+          url: issuer + '/jwks'
+        }).then(success, failure);
+
+        return deferred.promise;
+      }
+
+      Anvil.getKeys = getKeys;
+
+      // should this be called here or in .run block?
+      //Anvil.getKeys().then(function () {
+      //  console.log(provider)
+      //});
 
 
       /**
