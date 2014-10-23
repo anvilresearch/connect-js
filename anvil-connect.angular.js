@@ -322,6 +322,8 @@ angular.module('anvil', [])
           var idJWS = new KJUR.jws.JWS();
 
           // NEED TO REVIEW THIS CODE FOR SANITY
+          // Check the conditions in which some of these verifications
+          // are skipped.
 
           // Decode the access token and verify signature
           if (response.access_token
@@ -354,8 +356,16 @@ angular.module('anvil', [])
             deferred.reject('Invalid nonce.');
           }
 
-          // TODO:
-          // - verify access token (athash claim)
+          // Verify at_hash
+          if (['id_token token'].indexOf(params.response_type) !== -1) {
+            var atHash = CryptoJS
+              .SHA256(response.access_token)
+              .toString(CryptoJS.enc.Hex)
+            atHash = atHash.slice(0, atHash.length / 2);
+            if (response.id_claims && atHash !== response.id_claims.at_hash) {
+              deferred.reject('Invalid access token hash in id token payload');
+            }
+          }
 
           Anvil.session = session = response;
 
