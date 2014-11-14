@@ -24,20 +24,42 @@ angular.module('anvil', [])
      */
 
     function setJWK (jwks) {
-      if (!Array.isArray(jwks) && typeof jwks === 'object') {
-        jwks = [jwks];
+      var key = 'anvil.connect.jwk';
+
+      // Recover from localStorage.
+      if (!jwks) {
+        try {
+          jwk = JSON.parse(localStorage[key]);
+        } catch (e) {
+          console.log('Cannot deserialized JWK');
+        }
       }
 
+      // Argument is a naked object.
+      if (!Array.isArray(jwks) && typeof jwks === 'object') {
+        jwk = jwks;
+      }
+
+      // Argument is an array of JWK objects.
+      // Find the key for verifying signatures.
       if (Array.isArray(jwks)) {
-        jwks.forEach(function (key) {
-          if (key && key.use === 'sig') {
-            provider.jwk = jwk = jwks[0];
-            provider.hN = hN = b64tohex(jwk.n);
-            provider.hE = hE = b64tohex(jwk.e);
+        jwks.forEach(function (obj) {
+          if (obj && obj.use === 'sig') {
+            jwk = obj;
           }
         });
       }
+
+      if (jwk) {
+        provider.jwk = jwk;
+        provider.hN = hN = b64tohex(jwk.n);
+        provider.hE = hE = b64tohex(jwk.e);
+        localStorage[key] = JSON.stringify(jwk)
+      }
     }
+
+    this.setJWK = setJWK;
+
 
     /**
      * Provider configuration

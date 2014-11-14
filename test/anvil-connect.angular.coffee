@@ -5,7 +5,7 @@ describe 'Anvil Connect', ->
 
 
 
-  {Anvil,AnvilProvider,uri,nonce,$httpBackend,promise} = {}
+  {Anvil,AnvilProvider,uri,nonce,$httpBackend,promise,jwk} = {}
 
 
 
@@ -34,6 +34,86 @@ describe 'Anvil Connect', ->
   beforeEach inject ($injector) ->
     $httpBackend = $injector.get '$httpBackend'
     Anvil = $injector.get 'Anvil'
+
+
+
+
+  describe 'setJWK', ->
+
+    describe 'with empty argument', ->
+
+      beforeEach ->
+        jwk =
+          kid: 'empty'
+          kty: 'TEST'
+          use: 'sig'
+          alg: 'WTF'
+          n: 'h3xh3xh3x'
+          e: 'h3x'
+        localStorage['anvil.connect.jwk'] = JSON.stringify jwk
+        AnvilProvider.setJWK()
+
+      it 'should serialize the JWK in localStorage', ->
+        expect(localStorage['anvil.connect.jwk']).toEqual JSON.stringify(jwk)
+
+      it 'should set the jwk on the provider', ->
+        expect(AnvilProvider.jwk).toEqual jwk
+
+      it 'should set the modulus on the provider', ->
+        expect(AnvilProvider.hN).toBe b64tohex(jwk.n)
+
+      it 'should set the exponent on the provider', ->
+        expect(AnvilProvider.hE).toBe b64tohex(jwk.e)
+
+
+    describe 'with object argument', ->
+
+      beforeEach ->
+        jwk =
+          kid: 'object'
+          kty: 'TEST'
+          use: 'sig'
+          alg: 'WTF'
+          n: 'h3xh3xh3x'
+          e: 'h3x'
+        AnvilProvider.setJWK(jwk)
+
+      it 'should serialize the JWK in localStorage', ->
+        expect(localStorage['anvil.connect.jwk']).toBe JSON.stringify(jwk)
+
+      it 'should set the jwk on the provider', ->
+        expect(AnvilProvider.jwk).toBe jwk
+
+      it 'should set the modulus on the provider', ->
+        expect(AnvilProvider.hN).toBe b64tohex(jwk.n)
+
+      it 'should set the exponent on the provider', ->
+        expect(AnvilProvider.hE).toBe b64tohex(jwk.e)
+
+
+    describe 'with array argument', ->
+
+      beforeEach ->
+        jwk =
+          kid: 'object'
+          kty: 'TEST'
+          use: 'sig'
+          alg: 'WTF'
+          n: 'h3xh3xh3x'
+          e: 'h3x'
+        AnvilProvider.setJWK([jwk])
+
+      it 'should serialize the JWK in localStorage', ->
+        expect(localStorage['anvil.connect.jwk']).toBe JSON.stringify(jwk)
+
+      it 'should set the jwk on the provider', ->
+        expect(AnvilProvider.jwk).toBe jwk
+
+      it 'should set the modulus on the provider', ->
+        expect(AnvilProvider.hN).toBe b64tohex(jwk.n)
+
+      it 'should set the exponent on the provider', ->
+        expect(AnvilProvider.hE).toBe b64tohex(jwk.e)
 
 
 
@@ -307,9 +387,9 @@ describe 'Anvil Connect', ->
     it 'should set session property on the service', ->
       expect(Anvil.session.access_token).toBe "eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI0NTM1MDk5ZjY1NzBiOTBjZTE5ZiIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsInN1YiI6IjQwNzZmNDEyLTM3NGYtNGJjNi05MDlhLTFkOGViMWFhMjMzYyIsImF1ZCI6IjU4MTQ4YjcwLTg1YWEtNDcyNi1hZjdkLTQyYmQxMDlkY2M0OSIsImV4cCI6MTQxMzk0NDc1ODMzNSwiaWF0IjoxNDEzOTQxMTU4MzM1LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIn0.QuBrm0kb0NeVigV1vm_p6-xnGj0J0F_26PHUILtMhsa5-K2-W-0JtQ7o0xcoa7WKlBX66mkGDBKJSpA3kLi4lYEkSUUOo5utxwtrAaIS7wYlq--ECHhdpfHoYgdx4W06YBfmSekbQiVmtnBMOWJt2J6gmTphhwiE5ytL4fggU79LTg30mb-X9FJ_nRnFh_9EmnOLOpej8Jxw4gAQN6FEfcQGRomQ-rplP4cAs1i8Pt-3qYEmQSrjL_w8LqT69-MErhbCVknq7BgQqGcbJgYKOoQuRxWudkSWQljOaVmSdbjLeYwLilIlwkgWcsIuFuSSPtaCNmNhdn13ink4S5UuOQ"
 
-    it 'should serialize the session'
+    #it 'should serialize the session'
 
-    it 'should resolve the promise'
+    #it 'should resolve the promise'
 
 
   describe 'authorize with location fragment', ->
