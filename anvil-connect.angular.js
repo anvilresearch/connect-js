@@ -498,7 +498,7 @@ angular.module('anvil', [])
         var deferred = $q.defer();
 
         function success (response) {
-          setJWK(response.data);
+          setJWK(response.data && response.data.keys);
           deferred.resolve(response.data)
         }
 
