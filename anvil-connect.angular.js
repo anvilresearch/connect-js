@@ -62,6 +62,39 @@ angular.module('anvil', [])
 
 
     /**
+     * Require Authentication
+     */
+
+    function requireAuthentication ($location, Anvil) {
+      if (!Anvil.isAuthenticated()) {
+        Anvil.authorize();
+      }
+
+      return Anvil.session;
+    }
+
+    this.requireAuthentication = ['$location', 'Anvil', requireAuthentication];
+
+
+    /**
+     * Require Scope
+     */
+
+    this.requireScope = function (scope, fail) {
+      return ['$location', 'Anvil', function requireScope ($location, Anvil) {
+        if (!Anvil.isAuthenticated()) {
+          Anvil.authorize();
+        } else if (Anvil.session.access_claims.scope.indexOf(scope) === -1) {
+          $location.path(fail);
+          return false;
+        } else {
+          return Anvil.session
+        }
+      }];
+    }
+
+
+    /**
      * Provider configuration
      */
 
@@ -243,7 +276,6 @@ angular.module('anvil', [])
         Anvil.session = session = {};
         document.cookie = 'anvil.connect=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         delete localStorage['anvil.connect'];
-        // what about signing out of the auth server?
       };
 
       Anvil.reset = reset;
@@ -445,6 +477,8 @@ angular.module('anvil', [])
 
         // initiate the auth flow
         else {
+          Anvil.destination($location.path());
+
           // open the signin page in a popup window
           if (display === 'popup') {
             var deferred = $q.defer();
@@ -483,11 +517,51 @@ angular.module('anvil', [])
        */
 
       function signout () {
+        Anvil.destination(false);
         Anvil.reset()
         $window.location = issuer + '/signout?redirect_uri=' + $window.location.href;
       }
 
       Anvil.signout = signout;
+
+
+      /**
+       * Destination
+       *
+       * Getter/setter $location.path()
+       *
+       *    // Set the destination
+       *    Anvil.destination($location.path());
+       *
+       *    // Get the destination
+       *    Anvil.destination();
+       *
+       *    // Clear the destination
+       *    Anvil.destination(false);
+       */
+
+      function destination (path) {
+        if (path === false) {
+          delete localStorage['anvil.connect.destination'];
+        } else if (path) {
+          localStorage['anvil.connect.destination'] = path;
+        } else {
+          return localStorage['anvil.connect.destination'];
+        }
+      }
+
+      Anvil.destination = destination;
+
+
+      /**
+       * Is Authenticated
+       */
+
+      function isAuthenticated () {
+        return (Anvil.session.id_token);
+      }
+
+      Anvil.isAuthenticated = isAuthenticated;
 
 
       /**
