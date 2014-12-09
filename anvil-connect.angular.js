@@ -516,10 +516,18 @@ angular.module('anvil', [])
        * Signout
        */
 
-      function signout () {
-        Anvil.destination(false);
-        Anvil.reset()
-        $window.location = issuer + '/signout?redirect_uri=' + $window.location.href;
+      function signout (path) {
+        // parse the window location
+        var url = document.createElement('a');
+        url.href = $window.location.href;
+        url.pathname = path || '/';
+
+        // set the destination
+        Anvil.destination(path || false);
+        Anvil.reset();
+
+        // "redirect" to sign out of the auth server
+        $window.location = issuer + '/signout?redirect_uri=' + url.href;
       }
 
       Anvil.signout = signout;
@@ -542,7 +550,9 @@ angular.module('anvil', [])
 
       function destination (path) {
         if (path === false) {
+          var path = localStorage['anvil.connect.destination'];
           delete localStorage['anvil.connect.destination'];
+          return path;
         } else if (path) {
           localStorage['anvil.connect.destination'] = path;
         } else {
