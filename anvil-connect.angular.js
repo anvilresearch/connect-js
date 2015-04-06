@@ -122,9 +122,10 @@ angular.module('anvil', [])
     this.$get = [
       '$q',
       '$http',
+      '$rootScope',
       '$location',
       '$document',
-      '$window', function ($q, $http, $location, $document, $window) {
+      '$window', function ($q, $http, $rootScope, $location, $document, $window) {
 
 
       /**
@@ -237,7 +238,7 @@ angular.module('anvil', [])
 
         var encrypted = sjcl.encrypt(secret, JSON.stringify(Anvil.session));
         localStorage['anvil.connect'] = encrypted;
-        console.log('SERIALIZED', encrypted);
+        //console.log('SERIALIZED', encrypted);
       };
 
       Anvil.serialize = serialize;
@@ -262,7 +263,7 @@ angular.module('anvil', [])
         }
 
         Anvil.session = session = parsed || {};
-        console.log('DESERIALIZED', session);
+        //console.log('DESERIALIZED', session);
       };
 
       Anvil.deserialize = deserialize;
@@ -527,7 +528,7 @@ angular.module('anvil', [])
         Anvil.reset();
 
         // "redirect" to sign out of the auth server
-        $window.location = issuer + '/signout?redirect_uri=' + url.href;
+        $window.location = issuer + '/signout?redirect_uri=' + url.host;
       }
 
       Anvil.signout = signout;
@@ -561,6 +562,21 @@ angular.module('anvil', [])
       }
 
       Anvil.destination = destination;
+
+
+      /**
+       * Update Session
+       */
+
+      function updateSession (event) {
+        if (event.key === 'anvil.connect') {
+          Anvil.deserialize();
+          $rootScope.$apply();
+        }
+      }
+
+      Anvil.updateSession = updateSession;
+      $window.addEventListener('storage', updateSession, true);
 
 
       /**
