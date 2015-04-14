@@ -196,6 +196,7 @@ var Anvil = (function () {
 
     var encrypted = sjcl.encrypt(secret, JSON.stringify(Anvil.session));
     localStorage['anvil.connect'] = encrypted;
+    localStorage['anvil.connect.session.state'] = Anvil.sessionState;
     //console.log('SERIALIZED', encrypted);
   };
 
@@ -221,7 +222,8 @@ var Anvil = (function () {
     }
 
     Anvil.session = session = parsed || {};
-    //console.log('DESERIALIZED', session);
+    Anvil.sessionState = localStorage['anvil.connect.session.state'];
+    console.log('DESERIALIZED', session, Anvil.sessionState);
     return session;
   };
 
@@ -337,7 +339,8 @@ var Anvil = (function () {
 
     if (response.error) {
       // clear localStorage/cookie/etc
-      //console.log('RP CALLBACK ERROR')
+      Anvil.sessionState = response.session_state
+      localStorage['anvil.connect.session.state'] = Anvil.sessionState;
       Anvil.reset()
       deferred.reject(response);
     }
@@ -394,6 +397,8 @@ var Anvil = (function () {
       }
 
       Anvil.session = session = response;
+      Anvil.sessionState = response.session_state
+      //console.log('CALLBACK SESSION STATE', Anvil.sessionState)
 
       Anvil.userInfo().then(
         function userInfoSuccess (userInfo) {
@@ -523,8 +528,7 @@ var Anvil = (function () {
 
   function checkSession(id) {
     var targetOrigin = this.issuer;
-    var message = this.params.client_id + ' ' + this.session.session_state;
-    //console.log('CHECK SESSION MESSAGE', message, this.session)
+    var message = this.params.client_id + ' ' + this.sessionState;
     var w = window.parent.document.getElementById(id).contentWindow;
     w.postMessage(message, targetOrigin);
   }
@@ -598,50 +602,4 @@ var Anvil = (function () {
 
   return Anvil;
 })();
-
-    /**
-     * Require Authentication
-     */
-
-    //function requireAuthentication (location, Anvil) {
-    //  if (!Anvil.isAuthenticated()) {
-    //    Anvil.authorize();
-    //  }
-
-    //  return Anvil.session;
-    //}
-
-    //this.requireAuthentication = ['location', 'Anvil', requireAuthentication];
-
-
-    /**
-     * Require Scope
-     */
-
-    //this.requireScope = function (scope, fail) {
-    //  return ['location', 'Anvil', function requireScope (location, Anvil) {
-    //    if (!Anvil.isAuthenticated()) {
-    //      Anvil.authorize();
-    //    } else if (Anvil.session.access_claims.scope.indexOf(scope) === -1) {
-    //      location.path(fail);
-    //      return false;
-    //    } else {
-    //      return Anvil.session
-    //    }
-    //  }];
-    //}
-
-
-
-
-    /**
-     * Factory
-     */
-
-    //this.$get = [
-    //  '$q',
-    //  '$http',
-    //  'location',
-    //  'document',
-    //  'window', function ($q, $http, location, document, window) {
 
