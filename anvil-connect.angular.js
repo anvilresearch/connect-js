@@ -528,7 +528,7 @@ angular.module('anvil', [])
         Anvil.reset();
 
         // "redirect" to sign out of the auth server
-        $window.location = issuer + '/signout?redirect_uri=' + url.host;
+        $window.location = issuer + '/signout?post_logout_redirect_uri=' + url.host;
       }
 
       Anvil.signout = signout;
