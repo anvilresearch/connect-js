@@ -1,12 +1,12 @@
 {
   "name": "anvil-connect",
   "version": "0.1.1",
-  "homepage": "https://github.com/christiansmith/anvil-connect-js",
+  "homepage": "https://github.com/anvilresearch/connect-js",
   "authors": [
     "Christian Smith <smith@anvil.io>",
     "Tom Kersten <tom@whitespur.com>"
   ],
-  "description": "JavaScript SDK for Anvil Connect",
+  "description": "Anvil Connect JavaScript client for web browsers",
   "main": "anvil-connect.js",
   "keywords": [
     "OpenID Connect",

@@ -1,7 +1,7 @@
 {
   "name": "anvil-connect-js",
-  "version": "0.0.0",
-  "description": "JavaScript SDK for Anvil Connect",
+  "version": "0.1.1",
+  "description": "Anvil Connect JavaScript client for web browsers",
   "author": {
     "name": "Christian Smith",
     "email": "smith@anvil.io",
@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/christiansmith/anvil-connect-js.git"
+    "url": "https://github.com/anvilresearch/connect-js.git"
   },
   "keywords": [
     "OpenID Connect",
@@ -33,9 +33,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/christiansmith/anvil-connect-js/issues"
+    "url": "https://github.com/anvilresearch/connect-js/issues"
   },
-  "homepage": "https://github.com/christiansmith/anvil-connect-js",
+  "homepage": "https://github.com/anvilresearch/connect-js",
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-karma": "^0.8.3",
