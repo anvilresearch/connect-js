@@ -3,12 +3,12 @@
 ### Install
 
 ```bash
-$ bower install https://github.com/christiansmith/anvil-connect-js.git --save
+$ bower install https://github.com/anvilresearch/connect-js.git --save
 ```
 
 ### AngularJS Usage
 
-Be sure to [register your app as a client](https://github.com/christiansmith/anvil-connect/wiki/Dynamic-Client-Registration) with your Anvil Connect provider to obtain credentials.
+Be sure to [register your app as a client](https://github.com/anvilresearch/connect/wiki/Dynamic-Client-Registration) with your Anvil Connect provider to obtain credentials.
 
 
 
