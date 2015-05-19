@@ -212,7 +212,7 @@ var Anvil = (function () {
 
     try {
       // Use the cookie value to decrypt the session in localStorage
-      re      = new RegExp('[; ]anvil.connect=([^\\s;]*)');
+      re      = new RegExp('(^|[; ])anvil.connect=([^\\s;]*)');
       secret  = document.cookie.match(re).pop();
       json    = sjcl.decrypt(secret, localStorage['anvil.connect']);
       parsed  = JSON.parse(json);
