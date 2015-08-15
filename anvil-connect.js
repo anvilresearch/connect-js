@@ -61,8 +61,8 @@ var Anvil = (function () {
 
     if (jwk) {
       //provider.jwk = jwk;
-      hN = b64tohex(jwk.n);
-      hE = b64tohex(jwk.e);
+      hN = b64utohex(jwk.n);
+      hE = b64utohex(jwk.e);
       localStorage[key] = JSON.stringify(jwk)
     }
   }

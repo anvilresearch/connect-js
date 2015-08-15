@@ -52,8 +52,8 @@ angular.module('anvil', [])
 
       if (jwk) {
         provider.jwk = jwk;
-        provider.hN = hN = b64tohex(jwk.n);
-        provider.hE = hE = b64tohex(jwk.e);
+        provider.hN = hN = b64utohex(jwk.n);
+        provider.hE = hE = b64utohex(jwk.e);
         localStorage[key] = JSON.stringify(jwk)
       }
     }
