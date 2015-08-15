@@ -196,8 +196,8 @@ angular.module('anvil', [])
         // Metrics for the current browser window.
         x0 = $window.screenX || $window.screenLeft
         y0 = $window.screenY || $window.screenTop
-        width = $window.outerWidth || $document.documentElement.clientWidth
-        height = $window.outerHeight || $document.documentElement.clientHeight
+        width = $window.outerWidth || $document[0].documentElement.clientWidth
+        height = $window.outerHeight || $document[0].documentElement.clientHeight
 
         // Computed popup window metrics.
         popupLeft = Math.round(x0) + (width - popupWidth) / 2
@@ -637,4 +637,3 @@ angular.module('anvil', [])
 
     }];
   })
-
