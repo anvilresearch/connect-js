@@ -481,7 +481,8 @@ var Anvil = (function () {
     Anvil.reset();
 
     // "redirect" to sign out of the auth server
-    window.location = issuer + '/signout?post_logout_redirect_uri=' + url.host;
+    window.location = issuer + '/signout?post_logout_redirect_uri=' +
+      url.href + '&hint=id_token_hint=' + Anvil.session.id_token;
   }
 
   Anvil.signout = signout;
