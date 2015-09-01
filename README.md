@@ -1,4 +1,4 @@
-# JavaScript SDK for Anvil Connect
+# Anvil Connect JavaScript Client
 
 ### Install
 
