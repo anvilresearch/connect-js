@@ -8,7 +8,7 @@ $ bower install anvil-connect --save
 
 ### AngularJS Usage
 
-Be sure to [register your app as a client](https://github.com/anvilresearch/connect/wiki/Dynamic-Client-Registration) with your Anvil Connect provider to obtain credentials.
+Be sure to [register your app as a client](https://github.com/anvilresearch/connect-docs/blob/master/clients.md#registration) with your Anvil Connect provider to obtain credentials.
 
 
 
