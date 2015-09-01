@@ -3,7 +3,7 @@
 ### Install
 
 ```bash
-$ bower install https://github.com/anvilresearch/connect-js.git --save
+$ bower install anvil-connect --save
 ```
 
 ### AngularJS Usage
