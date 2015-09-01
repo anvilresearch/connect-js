@@ -1,10 +1,52 @@
 # Anvil Connect JavaScript Client
 
-### Install
+## Install
 
 ```bash
 $ bower install anvil-connect --save
 ```
+
+### API Documentation
+
+#### Anvil.configure(options)
+<!--
+lorem ipsum dolor amit
+
+**Arguments**
+
+- `prop` – description
+- `prop` – description
+- `prop` – description
+
+**Examples**
+
+```javascript
+// ...
+```
+-->
+#### Anvil.toFormUrlEncoded(obj)
+#### Anvil.parseFormUrlEncoded(str)
+#### Anvil.getUrlFragment(url)
+#### Anvil.popup(popupWidth, popupHeight)
+#### Anvil.session
+#### Anvil.serialize()
+#### Anvil.deserialize()
+#### Anvil.reset()
+#### Anvil.uri()
+#### Anvil.nonce()
+#### Anvil.sha256url()
+#### Anvil.headers()
+#### Anvil.request()
+#### Anvil.userInfo()
+#### Anvil.callback(response)
+#### Anvil.authorize()
+#### Anvil.signout(path)
+#### Anvil.destination(path)
+#### Anvil.checkSession(id)
+#### Anvil.updateSession(event)
+#### Anvil.isAuthenticated()
+#### Anvil.getKeys()
+
 
 ### AngularJS Usage
 
