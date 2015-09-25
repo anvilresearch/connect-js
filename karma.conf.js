@@ -3,7 +3,7 @@
 // Generated on 2014-06-18 using
 // generator-karma 0.8.2
 
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: true,
@@ -81,12 +81,12 @@ module.exports = function(config) {
 
     preprocessors: {
       '**/*.coffee': ['coffee']
-    },
-    // Uncomment the following lines if you are using grunt's server to run the tests
-    // proxies: {
-    //   '/': 'http://localhost:9000/'
-    // },
-    // URL root prevent conflicts with the site root
-    // urlRoot: '_karma_'
-  });
-};
+    }
+  // Uncomment the following lines if you are using grunt's server to run the tests
+  // proxies: {
+  //   '/': 'http://localhost:9000/'
+  // },
+  // URL root prevent conflicts with the site root
+  // urlRoot: '_karma_'
+  })
+}
