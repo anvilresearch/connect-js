@@ -16,7 +16,8 @@
   ],
   "main": "anvil-connect.js",
   "scripts": {
-    "test": "karma start --single-run --browsers PhantomJS",
+    "test": "karma start --single-run --browsers PhantomJS && npm run lint",
+    "lint": "eslint --ignore-path .gitignore . && echo Code looks good!",
     "test-firefox": "karma start --single-run --browsers Firefox",
     "test-chrome": "karma start --single-run --browsers Chrome",
     "test-all": "karma start --single-run --browsers PhantomJS,Firefox,Chrome"
@@ -40,6 +41,9 @@
   },
   "homepage": "https://github.com/anvilresearch/connect-js",
   "devDependencies": {
+    "eslint": "^1.5.1",
+    "eslint-config-standard": "^4.4.0",
+    "eslint-plugin-standard": "^1.3.1",
     "grunt": "^0.4.5",
     "grunt-release": "^0.13.0",
     "karma": "^0.12.16",
