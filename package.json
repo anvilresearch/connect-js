@@ -20,7 +20,8 @@
     "lint": "eslint --ignore-path .gitignore . && echo Code looks good!",
     "test-firefox": "karma start --single-run --browsers Firefox",
     "test-chrome": "karma start --single-run --browsers Chrome",
-    "test-all": "karma start --single-run --browsers PhantomJS,Firefox,Chrome"
+    "test-all": "karma start --single-run --browsers PhantomJS,Firefox,Chrome",
+    "test-all-travis": "karma start --single-run --browsers PhantomJS,Firefox,ChromeOnTravis"
   },
   "repository": {
     "type": "git",

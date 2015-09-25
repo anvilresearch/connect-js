@@ -60,6 +60,13 @@ module.exports = function (config) {
       'Chrome'
     ],
 
+    customLaunchers: {
+      ChromeOnTravis: {
+        base: 'Chrome',
+        flags: ['--no-sandbox']
+      }
+    },
+
     // Which plugins to enable
     plugins: [
       'karma-coffee-preprocessor',
