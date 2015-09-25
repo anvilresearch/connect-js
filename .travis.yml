@@ -26,6 +26,7 @@ install:
   - export CXX=g++-4.8
   - $CXX --version
   - npm install
+  - bower install
 
 script:
   - NODE_ENV=test npm run test-all
