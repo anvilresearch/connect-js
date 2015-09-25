@@ -16,7 +16,7 @@
   ],
   "main": "anvil-connect.js",
   "scripts": {
-    "test": "karma start"
+    "test": "karma start --single-run --browsers PhantomJS"
   },
   "repository": {
     "type": "git",
