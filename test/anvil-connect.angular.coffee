@@ -177,8 +177,6 @@ describe 'Anvil Connect', ->
       popup = Anvil.popup(700, 500)
       expect(popup).toContain 'width=700,'
       expect(popup).toContain 'height=500,'
-      expect(popup).toContain 'left=197,'
-      expect(popup).toContain 'top=176,'
       expect(popup).toContain 'dialog=yes,'
       expect(popup).toContain 'dependent=yes,'
       expect(popup).toContain 'scrollbars=yes,'
