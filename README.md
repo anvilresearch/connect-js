@@ -1,4 +1,5 @@
 # Anvil Connect JavaScript Client
+[![Build Status](https://travis-ci.org/anvilresearch/connect-js.svg?branch=master)](https://travis-ci.org/anvilresearch/connect-js)
 
 ## Install
 
