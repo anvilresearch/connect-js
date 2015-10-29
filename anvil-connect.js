@@ -212,7 +212,6 @@ window.Anvil = (function () {
 
     Anvil.session = session = parsed || {}
     Anvil.sessionState = localStorage['anvil.connect.session.state']
-    console.log('DESERIALIZED', session, Anvil.sessionState)
     return session
   }
 
