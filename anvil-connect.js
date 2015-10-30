@@ -207,7 +207,7 @@ window.Anvil = (function () {
       json = sjcl.decrypt(secret, localStorage['anvil.connect'])
       parsed = JSON.parse(json)
     } catch (e) {
-      console.log('Cannot deserialize session data')
+      //console.log('Cannot deserialize session data')
     }
 
     Anvil.session = session = parsed || {}
