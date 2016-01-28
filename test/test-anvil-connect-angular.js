@@ -3,7 +3,7 @@
 import 'webcrypto-shim'
 import {module, inject} from 'angular-mocks'
 import MockDate from 'mockdate'
-import '../src/anvil-connect-angular'
+import './anvil-connect-angular'
 import * as testData from './test-data'
 
 import * as jwsValidatorDecodeonly from '../src/jws-validator-decodeonly'

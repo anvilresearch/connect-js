@@ -4,7 +4,7 @@
 'use strict'  // ES6 modules are strict but may be safer for transpiling perhaps
 
 import Q from 'q'
-import Anvil from './anvil-connect'
+import Anvil from '../src/anvil-connect'
 
 export default function init (providerOptions) {
   Anvil.init(providerOptions, {

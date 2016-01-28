@@ -1,6 +1,6 @@
 {
   "name": "anvil-connect-js",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Anvil Connect JavaScript client for web browsers",
   "author": {
     "name": "Christian Smith",
@@ -17,7 +17,7 @@
       "name": "Henrich Kraemer"
     }
   ],
-  "main": "anvil-connect.js",
+  "main": "lib/anvil-connect.js",
   "directories": {
     "src": "./src",
     "lib": "./lib"
@@ -60,14 +60,13 @@
   },
   "homepage": "https://github.com/anvilresearch/connect-js",
   "dependencies": {
-    "angular": "^1.4.8",
     "base64-js": "^1.0.2",
     "bows": "^1.4.8",
-    "q": "^1.4.1",
     "text-encoder-lite": "^1.0.0",
     "tiny-emitter": "^1.0.2"
   },
   "devDependencies": {
+    "angular": "^1.4.8",
     "babel-core": "^6.3.26",
     "babel-polyfill": "^6.3.14",
     "babel-preset-es2015": "^6.1.18",
@@ -91,7 +90,8 @@
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-safari-launcher": "^0.1.1",
     "karma-systemjs": "^0.9.0",
-    "mocha": "^2.3.4"
+    "mocha": "^2.3.4",
+    "q": "^1.4.1"
   },
   "jspm": {
     "registry": "github",
@@ -100,25 +100,22 @@
     "directories": {
       "lib": "src"
     },
-    "map": {
-      "anvil-connect-jwt-validator": "./anvil-connect.novalidate.js"
-    },
     "dependencies": {
-      "angular": "angular/bower-angular@^1.4.8",
       "base64-js": "npm:base64-js@^0.0.8",
       "bows": "npm:bows@^1.4.8",
-      "mockdate": "npm:mockdate@^1.0.3",
-      "q": "npm:q@^1.4.1",
       "text-encoder-lite": "npm:text-encoder-lite@^1.0.0",
       "tiny-emitter": "npm:tiny-emitter@^1.0.1",
       "vibornoff/webcrypto-shim": "master",
       "webcrypto-shim": "vibornoff/webcrypto-shim@master"
     },
     "devDependencies": {
+      "angular": "angular/bower-angular@^1.4.8",
       "angular-mocks": "angular/bower-angular-mocks@^1.4.8",
       "babel": "npm:babel-core@^5.8.24",
       "babel-runtime": "npm:babel-runtime@^5.8.24",
-      "core-js": "npm:core-js@^1.1.4"
+      "core-js": "npm:core-js@^1.1.4",
+      "mockdate": "npm:mockdate@^1.0.3",
+      "q": "npm:q@^1.4.1"
     },
     "overrides": {
       "npm:text-encoder-lite@1.0.0": {

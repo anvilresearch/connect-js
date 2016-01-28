@@ -1,7 +1,7 @@
 /* eslint-env es6 */
 
 'use strict'  // ES6 modules are strict but may be safer for transpiling perhaps
-import Anvil from './anvil-connect'
+import Anvil from '../src/anvil-connect'
 import angular from 'angular'
 
 function init (providerOptions, $http, $q, $location, $window, $document) {

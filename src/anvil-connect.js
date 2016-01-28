@@ -5,6 +5,7 @@ import bows from 'bows'
 import TinyEmitter from 'tiny-emitter'
 import * as jwks from './jwks'
 import cryptors from './cryptors-with-fallbacks'
+import domApis from './domApis'
 
 let log = bows('Anvil')
 
@@ -125,12 +126,14 @@ function init (providerOptions, apis) {
 
   Anvil.initHttpAccess(apis.http)
 
-  Anvil.initLocationAccess(apis.location)
+  const apiLocation = apis.location || domApis.location
+  Anvil.initLocationAccess(apiLocation)
 
-  Anvil.initDOMAccess(apis.dom)
+  const dom = apis.dom || domApis.dom
+  Anvil.initDOMAccess(dom)
 
   // todo: perhaps this should be in its own method
-  apis.dom.getWindow().addEventListener('storage', Anvil.updateSession, true)
+  dom.getWindow().addEventListener('storage', Anvil.updateSession, true)
 }
 
 Anvil.init = init
@@ -732,6 +735,7 @@ Anvil.destination = destination
  */
 
 function checkSession (id) {
+  log.debug('checkSession()', id)
   var targetOrigin = Anvil.issuer
   var message = Anvil.params.client_id + ' ' + Anvil.sessionState
   var w = window.parent.document.getElementById(id).contentWindow
