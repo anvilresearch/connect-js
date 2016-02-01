@@ -1,5 +1,7 @@
 /* eslint-env es6 */
 
+import 'webcrypto-shim'
+
 'use strict'  // ES6 modules are strict but may be safer for transpiling perhaps
 import Anvil from '../src/anvil-connect'
 import angular from 'angular'

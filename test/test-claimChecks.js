@@ -1,5 +1,5 @@
 /* eslint-env jasmine */
-
+import 'webcrypto-shim'
 import * as cc from '../src/claimChecks'
 import * as testData from './test-data'
 import {omit} from './tlib'

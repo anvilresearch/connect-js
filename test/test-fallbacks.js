@@ -1,4 +1,5 @@
 /* eslint-env jasmine */
+import 'webcrypto-shim'
 import fallbacks from '../src/cryptors-with-fallbacks'
 
 const original_encryptor = fallbacks.encryptor
@@ -96,21 +97,21 @@ describe('test fallback mechanism', () => {
       var shouldThrow = function foo () {
         fallbacks.jwtvalidator = 'dah'
       }
-      expect(shouldThrow).toThrowError(/Cannot set property jwtvalidator/)
+      expect(shouldThrow).toThrow()
       expect(fallbacks.jwtvalidator).toBe(original_jwtvalidator)
     })
     it('cannot simply overwrite encryptor', () => {
       var shouldThrow = function () {
         fallbacks.encryptor = 'dah'
       }
-      expect(shouldThrow).toThrowError(/Cannot set property encryptor/)
+      expect(shouldThrow).toThrow()
       expect(fallbacks.encryptor).toBe(original_encryptor)
     })
     it('cannot simply overwrite setNoWebCryptoFallbacks()', () => {
       var shouldThrow = function () {
         fallbacks.setNoWebCryptoFallbacks = function () {}
       }
-      expect(shouldThrow).toThrowError(/Cannot set property setNoWebCryptoFallbacks/)
+      expect(shouldThrow).toThrow()
       expect(fallbacks.setNoWebCryptoFallbacks).toBe(original_setNoWebCryptoFallbacks)
     })
   })
