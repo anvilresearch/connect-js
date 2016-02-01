@@ -6,10 +6,10 @@ import * as testData from './test-data'
 
 describe('Check jws-validator', () => {
   const key = {
-    jwk: testData.jwk
+    jwk: testData.real_data.jwk
   }
 
-  const token = testData.jwt_token_encoded
+  const token = testData.access_token_encoded
 
   describe('verifies a good token', () => {
     let result = {}
@@ -22,7 +22,7 @@ describe('Check jws-validator', () => {
         },
         err => {
           result.err = err
-          done()
+          done.fail(err)
         }
       )
     })
@@ -32,7 +32,7 @@ describe('Check jws-validator', () => {
     })
     it('should fulfill with the claims', () => {
       expect(Object.keys(result.claims)).toEqual(["jti", "iss", "sub", "aud", "exp", "iat", "scope"])
-      const expected = testData.jwt_token.payload
+      const expected = testData.access_token.payload
       expect(result.claims.aud).toEqual(expected.aud)
       expect(result.claims.exp).toEqual(expected.exp)
       expect(result.claims.iat).toEqual(expected.iat)
@@ -45,7 +45,7 @@ describe('Check jws-validator', () => {
 
   describe('reject a bad token', () => {
     let result = {}
-    const badToken = testData.jwt_token_encoded_bad_signature
+    const badToken = testData.access_token_encoded_bad_signature
     // badToken can be logged in test-subtle-encrypt
     beforeEach(done => {
       jwtvalidator.validateAndParseToken(key.jwk, badToken).then(
@@ -66,7 +66,7 @@ describe('Check jws-validator', () => {
   })
   describe('reject an alg=none', () => {
     let result = {}
-    const algNoneToken = testData.jwt_token_encoded_alg_none
+    const algNoneToken = testData.access_token_encoded_alg_none
     // algNoneToken can be logged in test-subtle-encrypt
     beforeEach(done => {
       jwtvalidator.validateAndParseToken(key.jwk, algNoneToken).then(

@@ -6,6 +6,7 @@ import TinyEmitter from 'tiny-emitter'
 import * as jwks from './jwks'
 import cryptors from './cryptors-with-fallbacks'
 import domApis from './domApis'
+import {checkAccessClaims, checkIdClaims} from './claimChecks'
 
 let log = bows('Anvil')
 
@@ -421,44 +422,66 @@ function userInfo () {
 
 Anvil.promise.userInfo = userInfo
 
-// this is just a sketch
-function validateClaims (claims) {
-  if (!claims) {
-    return claims
+function validate_jwt (type, response) {
+  const response_types = Anvil.params.response_type.trim().split(' ')
+  const response_type = response_types.find(e => e === type)
+  if (!response_type) {
+    // token of this type is not required, so carry on.
+    return Promise.resolve()
   }
-  const now = new Date() / 1000
-  const {iat, exp, iss, aud} = claims
-  if (!exp) {
-    throw new Error('token must have exp')
+  const tokenType = {
+    'token': 'access',
+    'id_token': 'id'
   }
-  if (!iat) {
-    throw new Error('token must have iat')
+  const token_type = `${tokenType[type]}_token`
+  const token = response[token_type]
+  if (!token) {
+    return Promise.reject(new Error(`Expected ${token_type} not in response`))
   }
-  if (!iss) {
-    throw new Error('token must have iss')
+  const jwtvalidator = cryptors.jwtvalidator
+  log.debug(`validate_jwt(): validateAndParseToken ${token_type}: ${token}`)
+  const p = jwtvalidator.validateAndParseToken(jwks.jwk, token)
+  return p.then(claims => {
+    const f = (type === 'token') ? checkAccessClaims : checkIdClaims
+    return f(claims, {
+      issuer: Anvil.issuer,
+      client_id: Anvil.params.client_id}
+    )
+  }).then(claims => {
+    response[`${tokenType[type]}_claims`] = claims
+  }).catch(err => {
+    const msg = `validate_jwt(): ${token_type} not validated: ${err.message}`
+    log.warn(msg, err.stack)
+    throw new Error(msg)
+  })
+}
+
+function verifyNonce (response) {
+  if (response.id_claims) {
+    log.debug('validateNonce(): checking id_claims.nonce')
+    return Anvil.promise.nonce(response.id_claims.nonce)
+      .then(nonceIsValid => {
+        log.debug('callback(): nonceIsValid=', nonceIsValid)
+        if (!nonceIsValid) {
+          throw new Error('Invalid nonce.')
+        }
+      })
   }
-  if (!aud) {
-    throw new Error('token must have aud')
+  return Promise.resolve()
+}
+
+function verifyAtHash (response) {
+  if (['id_token token'].indexOf(Anvil.params.response_type) !== -1) {
+    log.debug('verifyAtHash(): checking at hash')
+    return cryptors.encryptor.sha256sum(response.access_token)
+      .then(atHash => {
+        atHash = atHash.slice(0, atHash.length / 2)
+        if (response.id_claims && atHash !== response.id_claims.at_hash) {
+          throw new Error('Invalid at hash')
+        }
+      })
   }
-  if (typeof exp !== 'number') {
-    throw new Error('token must have exp of type number')
-  }
-  if (typeof iat !== 'number') {
-    throw new Error('token must have iat of type number')
-  }
-  if (now > exp) {
-    throw new Error('token is expired.')
-  }
-  if (iat > now) {
-    throw new Error('token invalid: issued at is in the future.')
-  }
-  if (iss !== Anvil.issuer) {
-    throw new Error(`token iss '${iss}' does not match '${Anvil.issuer}'`)
-  }
-  if (aud !== Anvil.params.client_id) {
-    throw new Error(`token aud '${aud}' does not match '${Anvil.params.client_id}'`)
-  }
-  return claims
+  return Promise.resolve()
 }
 
 /**
@@ -483,71 +506,40 @@ function callback (response) {
 
     const jwtvalidator = cryptors.jwtvalidator
 
+    // Ensure:
+    // missing tokens are not OK!
+    // possible responses are enumerated in http://openid.net/specs/openid-connect-core-1_0.html#rfc.section.3
+    // Authorization code flow seems questionable in browsers!
+
+    // implicit:
+    // a. response_type='id_token token' both MUST be returned.
+    // b. response_type='id_token' no access token so no need and access token to get user info
+
     return Promise.resolve()
       // 0. ensure there is a jwk unless jwtvalidator does not need it.
       .then(() => {
         if (!jwtvalidator.noJWKrequired && !jwks.jwk) {
           throw new Error('You must call and fulfill Anvil.prepareAuthorization() before attempting to validate tokens')
         }
+        log.debug('jwk=', jwks.jwk)
       })
       // 1. validate/parse access token
       .then(() => {
-        log.debug('callback(): validateAndParseToken access token:', response.access_token)
-        return jwtvalidator.validateAndParseToken(jwks.jwk, response.access_token)
-      })
-      .then(claims => {
-        return validateClaims(claims)
-      })
-      .catch(e => {
-        log.debug('Exception validating access token', e.toString())
-        throw new Error('Failed to verify or parse access token')
-      })
-      .then(claims => {
-        log.debug('callback(): settings response.access_claims', claims)
-        response.access_claims = claims
+        // sets: response.access_claims if token is required and validation succeeds
+        // otherwise is rejected.
+        return validate_jwt('token', response)
       })
       // 2. validate/parse id token
       .then(() => {
-        log.debug('callback(): validateAndParseToken id token:', response.id_token)
-        return jwtvalidator.validateAndParseToken(jwks.jwk, response.id_token)
+        return validate_jwt('id_token', response) // sets response.id_claims if required.
       })
-      .then(claims => {
-        return validateClaims(claims)
-      })
-      .catch(e => {
-        log.debug('Exception validating id token', e.toString())
-        throw new Error('Failed to verify or parse id token')
-      })
-      .then(claims => {
-        log.debug('callback(): settings response.id_claims', claims)
-        response.id_claims = claims
-      })
-      // 3. validate nonce
+      // 3. verify nonce
       .then(() => {
-        log.debug('callback(): validating nonce..')
-        if (response.id_claims) {
-          return Anvil.promise.nonce(response.id_claims.nonce)
-        } else {
-          return true
-        }
-      }).then(nonceIsValid => {
-        log.debug('callback(): nonceIsValid=', nonceIsValid)
-        if (!nonceIsValid) {
-          throw new Error('Invalid nonce.')
-        }
+        return verifyNonce(response)
       })
       // 4. Verify at_hash
       .then(() => {
-        log.debug('callback(): validating at hash')
-        if (['id_token token'].indexOf(Anvil.params.response_type) !== -1) {
-          return cryptors.encryptor.sha256sum(response.access_token)
-            .then(atHash => {
-              atHash = atHash.slice(0, atHash.length / 2)
-              if (response.id_claims && atHash !== response.id_claims.at_hash) {
-                throw new Error('Invalid access token hash in id token payload')
-              }
-            })
-        }
+        return verifyAtHash(response)
       })
       // If 1-4 check out establish session:
       .then(() => {
@@ -557,25 +549,47 @@ function callback (response) {
       })
       // and retrieve user info
       .then(() => {
-        log.debug('callback(): retrieving user info')
-        return Anvil.promise.userInfo().catch(e => {
-          log.debug('userInfo() retrieval failed with', e)
-          throw new Error('Retrieving user info from server failed.')
-        })
+        if (response.access_token) {
+          log.debug('callback(): retrieving user info')
+          return Anvil.promise.userInfo().then(userInfoResponse => {
+            // [Successful UserInfo Response](http://openid.net/specs/openid-connect-implicit-1_0.html#rfc.section.2.3.2)
+            let userInfo = apiHttp.getData(userInfoResponse)
+            // todo: If we get a bad userInfo we will not fail the session or should we?
+            // Spec: 1. The sub claim MUST be returned
+            // Spec: 2. The sub claim MUST be verified to exactly match the subClaim of the ID token.
+            // Spec: 3. The Client MUST verify that the OP that responded was the intended OP through a TLS server certificate chec
+            // Example response:
+            // Object {sub: "c43f3fc8-048a-457a-9cff-0a25d6e4e6f0", family_name: "W", given_name: "P", updated_at: 1446218445857}
+            // Now #3 should be done by any browser!
+            // #1 and 2 is to be done here:
+            if (!userInfo.sub) {
+              log.error('Returned userInfo malformed')
+              return
+            } else if (response.id_claims && response.id_claims.sub !== userInfo.sub) {
+              log.error('Returned userInfo is about a different user than id token')
+              return
+            } else {
+              log.debug('callback(): setting user info', userInfo)
+              Anvil.session.userInfo = userInfo
+              return
+            }
+          })
+          .catch(e => {
+            log.warn('userInfo() retrieval failed with', e.message, e.stack)
+          })
+        } else {
+          Promise.resolve()
+        }
       })
-      .then(userInfoResponse => {
-        let userInfo = apiHttp.getData(userInfoResponse)
-        log.debug('callback(): setting user info', userInfo)
-        Anvil.session.userInfo = userInfo
+      .then(() => {
         return Anvil.promise.serialize()
       })
       .then(() => {
-        log.debug('callback(): emitting authenticated:', Anvil.session)
         Anvil.emit('authenticated', Anvil.session)
         return Anvil.session
       })
       .catch(e => {
-        log.debug('Exception during callback:', e)
+        log.debug('Exception during callback:', e.message, e.stack)
         throw e  // caller can ultimately handle this.
       })
   }

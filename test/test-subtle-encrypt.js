@@ -23,7 +23,7 @@ describe('Check generateEncryptionKey produces key', () => {
       done()
     }).catch(err => {
       result.err = err
-      done()
+      done.fail(err)
     })
   })
 
@@ -48,7 +48,7 @@ describe('Check encrypt/decrypt based on subtle webcrypto', () => {
       done()
     }).catch(err => {
       result.err = err
-      done()
+      done.fail(err)
     })
   })
 
@@ -61,7 +61,7 @@ describe('Check encrypt/decrypt based on subtle webcrypto', () => {
 describe('Check jwk sign verification', () => {
   describe('hard coded key', () => {
     let key = {
-      jwk: testData.jwk
+      jwk: testData.real_data.jwk
     }
 
     // NOTE: This is the original key copied from a prior test
@@ -91,7 +91,7 @@ describe('Check jwk sign verification', () => {
 
     log.debug('nwithoutZeroes= ', nwithoutZeroes)
 
-    let token = testData.jwt_token_encoded
+    let token = testData.access_token_encoded
 
     // let token_firefox = "eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI0NTM1MDk5ZjY1NzBiOTBjZTE5ZiIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMCIsInN1YiI6IjQwNzZmNDEyLTM3NGYtNGJjNi05MDlhLTFkOGViMWFhMjMzYyIsImF1ZCI6IjU4MTQ4YjcwLTg1YWEtNDcyNi1hZjdkLTQyYmQxMDlkY2M0OSIsImV4cCI6MTQxMzk0NDc1ODMzNSwiaWF0IjoxNDEzOTQxMTU4MzM1LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIn0.QuBrm0kb0NeVigV1vm_p6-xnGj0J0F_26PHUILtMhsa5-K2-W-0JtQ7o0xcoa7WKlBX66mkGDBKJSpA3kLi4lYEkSUUOo5utxwtrAaIS7wYlq--ECHhdpfHoYgdx4W06YBfmSekbQiVmtnBMOWJt2J6gmTphhwiE5ytL4fggU79LTg30mb-X9FJ_nRnFh_9EmnOLOpej8Jxw4gAQN6FEfcQGRomQ-rplP4cAs1i8Pt-3qYEmQSrjL_w8LqT69-MErhbCVknq7BgQqGcbJgYKOoQuRxWudkSWQljOaVmSdbjLeYwLilIlwkgWcsIuFuSSPtaCNmNhdn13ink4S5UuOQ"
 
@@ -105,7 +105,7 @@ describe('Check jwk sign verification', () => {
         err => {
           log.debug(err)
           expect(undefined).toBeTruthy()
-          done()
+          done.fail(err)
         }
       )
     })
@@ -122,7 +122,7 @@ describe('Check jwk sign verification', () => {
           {
             let payloadJSON = jws.decodeSegment(verifiedToken.payload)
             expect(Object.keys(payloadJSON)).toEqual(["jti", "iss", "sub", "aud", "exp", "iat", "scope"])
-            const expected = testData.jwt_token.payload
+            const expected = testData.access_token.payload
             expect(payloadJSON.aud).toEqual(expected.aud)
             expect(payloadJSON.exp).toEqual(expected.exp)
             expect(payloadJSON.iat).toEqual(expected.iat)
@@ -135,13 +135,13 @@ describe('Check jwk sign verification', () => {
         },
         err => {
           log.debug(err)
-          done()
+          done.fail(err)
           expect(undefined).toBeTruthy()
         }
       )
     })
     it('should NOT verify a none matching hardcoded token with key', done => {
-      const badToken = testData.jwt_token_encoded_bad_signature
+      const badToken = testData.access_token_encoded_bad_signature
       log.debug('badToken=', badToken)
       se.verifyJWT(key.jwk, badToken).then(
         verifiedToken => {
@@ -156,7 +156,7 @@ describe('Check jwk sign verification', () => {
     })
     // https://auth0.com/blog/2015/03/31/critical-vulnerabilities-in-json-web-token-libraries/
     it('should NOT verify a token with a substituted alg: none header', done => {
-      const algNoneToken = testData.jwt_token_encoded_alg_none
+      const algNoneToken = testData.access_token_encoded_alg_none
       log.debug('algNoneToken=', algNoneToken)
       se.verifyJWT(key.jwk, algNoneToken).then(
         () => {

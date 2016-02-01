@@ -17,7 +17,7 @@ describe('test encryptor-webcrypto module: generic tests', () => {
         done()
       }).catch(err => {
         result.err = err
-        done()
+        done.fail(err)
       })
     })
 
@@ -40,7 +40,7 @@ describe('test encryptor-webcrypto module: generic tests', () => {
         done()
       }).catch(err => {
         result.err = err
-        done()
+        done.fail(err)
       })
     })
 
@@ -71,7 +71,7 @@ describe('test encryptor-webcrypto module: generic tests', () => {
         done()
       }).catch(err => {
         result.err = err
-        done()
+        done.fail(err)
       })
     })
     it('should not report an error', () => {
@@ -90,7 +90,7 @@ describe('test encryptor-webcrypto module: generic tests', () => {
         done()
       }).catch(err => {
         result.err = err
-        done()
+        done.fail(err)
       })
     })
     it('should not report an error', () => {

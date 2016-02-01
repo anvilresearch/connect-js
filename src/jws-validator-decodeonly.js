@@ -34,13 +34,9 @@ export function validateAndParseToken (jwk, token) {
   // If this turns out to be a strategy widely deployed we may
   // optimize the caller to not require the jwk
   const p = Promise.resolve(undefined)
-  if (!token) {
-    return p
-  } else {
-    return p.then(() => {
-      const t = jws.segments(token)
-      const claims = jws.decodeSegment(t.payload)
-      return Promise.resolve(claims)
-    })
-  }
+  return p.then(() => {
+    const t = jws.segments(token)
+    const claims = jws.decodeSegment(t.payload)
+    return Promise.resolve(claims)
+  })
 }

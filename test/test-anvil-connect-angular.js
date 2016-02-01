@@ -11,14 +11,14 @@ import * as jwsValidatorDecodeonly from '../src/jws-validator-decodeonly'
 describe('Anvil Connect', function () {
   var {Anvil, AnvilProvider, uri, $httpBackend, promise} = {}
 
-  var config =
-    {issuer: testData.jwt_token.payload.iss,
-    client_id: testData.jwt_token.payload.aud,
+  var config = {
+    issuer: testData.real_data.access_claims.iss,
+    client_id: testData.real_data.access_claims.aud,
     redirect_uri: 'https://my.app.com',
     scope: ['other'],
     display: 'popup',
-    jwk: testData.jwk
-    }
+    jwk: testData.real_data.jwk
+  }
 
   beforeEach(module('anvil'))
 
@@ -114,7 +114,7 @@ describe('Anvil Connect', function () {
         done()
       }).catch(e => {
         this.exception = e
-        done()
+        done.fail(e)
       })
     })
 
@@ -261,7 +261,7 @@ describe('Anvil Connect', function () {
         done()
       }).catch(e => {
         result.err = e
-        done()
+        done.fail(e)
       })
     })
     it('should return a base64url encoded sha256 hash of a random value', function () {
@@ -281,7 +281,7 @@ describe('Anvil Connect', function () {
         done()
       }).catch(e => {
         result.err = e
-        done()
+        done.fail(e)
       })
     })
 
@@ -310,7 +310,7 @@ describe('Anvil Connect', function () {
         done()
       }).catch(e => {
         result.err = e
-        done()
+        done.fail(e)
       })
     })
     it('should base64url encode the SHA 256 hash of a provided string', () => {
@@ -415,24 +415,32 @@ describe('Anvil Connect', function () {
 
     beforeEach(function (done) {
       uri = config.issuer + '/userinfo'
-      $httpBackend.when('GET', uri).respond({})
+      $httpBackend.when('GET', uri).respond(testData.real_data.userInfo)
 
-      MockDate.set((testData.jwt_token.payload.iat + 1000) * 1000)
+      MockDate.set((testData.real_data.access_claims.iat + 1000) * 1000)
       // exp = iat + 3600
       // jasmine.clock().mockDate(baseTime) from jasmine 2.2
 
-      promise = Anvil.promise.callback({access_token: testData.jwt_token_encoded})
+      // todo: should there be a test to have no id-token when response_type is 'token'
+      // Anvil.configure(Object.assign({}, config, {response_type: 'token'}))
+      // tlocalStorage['nonce'] = testData.real_data.id_claims.nonce
+      spyOn(Anvil.promise, 'nonce').and.returnValue(Promise.resolve(true))
+      promise = Anvil.promise.callback({
+        access_token: testData.real_data.access_token,
+        id_token: testData.real_data.id_token
+      })
       setTimeout(flushHttpBackend, 0)
       promise.then(s => {
         result.session = s
         done()
-      }, e => {
+      }).catch(e => {
         result.err = e
-        done()
+        done.fail(e)
       })
     })
 
     afterEach(() => {
+      delete localStorage['nonce']
       MockDate.reset()
     })
 
@@ -440,8 +448,11 @@ describe('Anvil Connect', function () {
       expect(promise.then).toBeDefined()
     })
 
-    it('should set session property on the service', function () {
-      expect(Anvil.session.access_token).toBe(testData.jwt_token_encoded)
+    it('should set session access_token property', function () {
+      expect(Anvil.session.access_token).toBe(testData.real_data.access_token)
+    })
+    it('should set session id_token property', function () {
+      expect(Anvil.session.id_token).toBe(testData.real_data.id_token)
     })
   })
 
@@ -458,20 +469,21 @@ describe('Anvil Connect', function () {
     }
 
     beforeEach(function (done) {
-      MockDate.set((testData.jwt_token.payload.iat + 1000) * 1000)
+      MockDate.set((testData.access_token.payload.iat + 1000) * 1000)
       uri = config.issuer + '/userinfo'
-      $httpBackend.when('GET', uri).respond({})
+      $httpBackend.when('GET', uri).respond(testData.real_data.userInfo)
       Anvil.setNoWebCryptoFallbacks({
         jwtvalidatorOptions: {fallback: jwsValidatorDecodeonly, forceFallback: true}})
 
-      promise = Anvil.promise.callback({ access_token: testData.jwt_token_encoded_bad_signature })
+      Anvil.configure(Object.assign({}, config, {response_type: 'token'}))
+      promise = Anvil.promise.callback({ access_token: testData.access_token_encoded_bad_signature })
       setTimeout(flushHttpBackend, 0)
       promise.then(s => {
         result.session = s
         done()
       }, e => {
         result.err = e
-        done()
+        done.fail(e)
       })
     })
 
@@ -486,7 +498,7 @@ describe('Anvil Connect', function () {
     })
 
     it('should set session property on the service', function () {
-      expect(Anvil.session.access_token).toBe(testData.jwt_token_encoded_bad_signature)
+      expect(Anvil.session.access_token).toBe(testData.access_token_encoded_bad_signature)
     })
   })
 

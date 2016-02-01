@@ -2,13 +2,33 @@
 /* eslint-disable quotes */
 import * as se from '../src/subtle-crypto-utils'
 import {ab2base64urlstr, ascii2ab} from '../src/ab-utils'
-import {encodeJWSSegment} from '../test/tlib'
 import * as testData from '../test/test-data'
+import {atHash} from '../test/tlib'
 import bows from 'bows'
 
 const log = bows('Anvil Test')
 
 // localStorage.debug = true triggers log statements
+
+const wcs = window.crypto.subtle
+
+function sign_token (cryptoKey, ascii_token, token_name) {
+  return wcs.sign(
+    {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: {name: 'SHA-256'}
+    },
+    cryptoKey.privateKey,
+    ascii2ab(ascii_token))
+    .then(signature => {
+      const result = {}
+      result.signature = ab2base64urlstr(signature)
+      log.debug(`${token_name} signature= ${result.signature}`)
+      result.token = `${ascii_token}.${result.signature}`
+      log.debug(`${token_name} jws= ${result.token}`)
+      return result
+    })
+}
 
 describe('Check jwk sign verification', () => {
   describe('self generated key', () => {
@@ -16,13 +36,6 @@ describe('Check jwk sign verification', () => {
     // https://github.com/vibornoff/webcrypto-shim master from 1/10/2016
     // all other tests pass however.
     let result = {}
-    let token = testData.jwt_token
-    let encodedToken = {
-      header: encodeJWSSegment(token.header),
-      payload: encodeJWSSegment(token.payload)
-    }
-
-    const wcs = window.crypto.subtle
 
     beforeEach(done => {
       wcs.generateKey(
@@ -41,37 +54,39 @@ describe('Check jwk sign verification', () => {
           'jwk',
           k.publicKey)
           .then(
-            pubKey => { result.jwtPubKey = pubKey },
+            pubKey => {
+              result.jwtPubKey = pubKey
+            },
             err => log.debug('Gen or export public key failed:', err, err.stack)
           ).then(wcs.exportKey('jwk', k.privateKey)
           ).then(
-            privKey => { result.jwtPrivKey = privKey },
+            privKey => {
+              result.jwtPrivKey = privKey
+            },
             err => log.debug('Gen or export private key failed:', err, err.stack)
           )
       }).then(() => {
         log.debug('Exported public key:', result.jwtPubKey)
         log.debug('Exported private key:', result.jwtPrivKey)
       }).then(() => {
-        const tokenParts = encodedToken.header + '.' + encodedToken.payload
-
-        return wcs.sign(
-          {
-            name: 'RSASSA-PKCS1-v1_5',
-            hash: {name: 'SHA-256'}
-          },
-          result.ppkey.privateKey,
-          ascii2ab(tokenParts))
-          .then(signature => {
-            result.signature = ab2base64urlstr(signature)
-            log.debug('signature= ', result.signature)
-            result.token = `${encodedToken.header}.${encodedToken.payload}.${result.signature}`
-            log.debug(`jws= ${result.token}`)
-            return result.token
+        const access2sign = testData.encode_token_to_sign(testData.access_token)
+        const id2sign = testData.encode_token_to_sign(testData.id_token)
+        return Promise.all([
+          sign_token(result.ppkey, access2sign, 'access-token'),
+          sign_token(result.ppkey, id2sign, 'id-token')
+        ])
+      }).then(([access, id]) => {
+        result.token = access.token
+        return atHash(access.token).then(atHash => {
+          log.debug('atHash= ', atHash)
+        }).then(Promise.all([
+          se.verifyJWT(result.jwtPubKey, access.token).then(res => {
+            log.debug('se.verifyJWT fulfilled', res)
+          }),
+          se.verifyJWT(result.jwtPubKey, id.token).then(res => {
+            log.debug('se.verifyJWT fulfilled', res)
           })
-      }).then(token => {
-        return se.verifyJWT(result.jwtPubKey, token).then(res => {
-          log.debug('se.verifyJWT fulfilled', res)
-        })
+        ]))
       }).catch(err => {
         log.error('se.verifyJWT caught err:', err, err.stack)
         // subsequent then calls done in this case.
@@ -93,10 +108,9 @@ describe('Check jwk sign verification', () => {
           log.error('it handling err', err)
           expect(err).toBeNull()
           log.error('it calling done()')
-          done()
+          done.fail(err)
         }
       )
     })
   })
 })
-
