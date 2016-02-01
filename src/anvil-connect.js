@@ -236,6 +236,51 @@ function popup (popupWidth, popupHeight) {
 
 Anvil.popup = popup
 
+function getCookieSecret () {
+  const re = /\banvil\.connect=([^\s;]*)/
+  let dom = Anvil.domAccess.getDocument()
+  let cookie = dom.cookie
+  try {
+    return decodeURIComponent(cookie.match(re).pop())
+  } catch (err) {
+    log.debug('getCookieSecret(): failed, cookie=', cookie)
+    throw err
+  }
+}
+
+function setCookieSecret (secret) {
+  log.debug('setCookieSecret():', secret)
+  let dom = Anvil.domAccess.getDocument()
+  var now = new Date()
+  var time = now.getTime()
+  var exp = time + (Anvil.session.expires_in || 3600) * 1000
+  now.setTime(exp)
+  var value = 'anvil.connect=' + encodeURIComponent(secret) +
+    '; expires=' + now.toUTCString()
+  dom.cookie = value
+
+  try {
+    let stored = getCookieSecret()
+    if (stored !== secret) {
+      log.debug('setCookieSecret(): read back cookie value differs', [stored, secret])
+    }
+  } catch (err) {
+    log.debug('setCookieSecret(): failed to read back cookie')
+  }
+}
+
+function clearCookieSecret () {
+  log.debug('clearCookieSecret()')
+  let dom = Anvil.domAccess.getDocument()
+  dom.cookie = 'anvil.connect=; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+  try {
+    let stored = getCookieSecret()
+    log.debug('clearCookieSecret(): secret is now:', stored)
+  } catch (err) {
+    log.debug('clearCookieSecret(): secret could no longer be read back')
+  }
+}
+
 /**
  * Session object
  */
@@ -250,14 +295,7 @@ function serialize () {
   log.debug('serialize(): entering')
   let plaintext = JSON.stringify(Anvil.session)
   return cryptors.encryptor.encrypt(plaintext).then(({secret, encrypted}) => {
-    var now = new Date()
-    var time = now.getTime()
-    var exp = time + (Anvil.session.expires_in || 3600) * 1000
-
-    now.setTime(exp)
-    Anvil.domAccess.getDocument().cookie = 'anvil.connect=' + secret +
-      '; expires=' + now.toUTCString()
-
+    setCookieSecret(secret)
     log.debug('serialize() stored secret in COOKIE anvil.connect')
     localStorage['anvil.connect'] = encrypted
     log.debug('serialize() stored encrypted session data in local storage anvil.connect')
@@ -275,16 +313,12 @@ Anvil.promise.serialize = serialize
  * Deserialize session
  */
 function deserialize () {
-  var parsed
-
-  let dom = Anvil.domAccess.getDocument()
   const p = new Promise(function (resolve) {
     // Use the cookie value to decrypt the session in localStorage
     // Exceptions may occur if data is unexpected or there is no
     // session data yet.
     // An exception will reject the promise
-    const re = /\banvil\.connect=([^\s;]*)/
-    const secret = dom.cookie.match(re).pop()
+    const secret = getCookieSecret()
     const encrypted = localStorage['anvil.connect']
     let parms = Object.assign({}, {
       secret: secret,
@@ -307,8 +341,9 @@ function deserialize () {
     return session
   }).catch(e => {
     log.debug('Cannot deserialize session data', e)
-    Anvil.session = session = parsed || {}
-    Anvil.sessionState = localStorage['anvil.connect.session.state']
+    // caller should reset session if desired.
+    // Anvil.session = session = parsed || {}
+    // Anvil.sessionState = localStorage['anvil.connect.session.state']
   })
 }
 
@@ -321,7 +356,7 @@ Anvil.promise.deserialize = deserialize
 function reset () {
   log.debug('reset() called: clearing session')
   Anvil.session = session = {}
-  Anvil.domAccess.getDocument().cookie = 'anvil.connect=; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+  clearCookieSecret()
   delete localStorage['anvil.connect']
 }
 
@@ -422,9 +457,18 @@ function userInfo () {
 
 Anvil.promise.userInfo = userInfo
 
+function find (arr, x) {
+  for (let e of arr) {
+    if (e === x) {
+      return e
+    }
+  }
+  return undefined
+}
+
 function validate_jwt (type, response) {
   const response_types = Anvil.params.response_type.trim().split(' ')
-  const response_type = response_types.find(e => e === type)
+  const response_type = find(response_types, type)
   if (!response_type) {
     // token of this type is not required, so carry on.
     return Promise.resolve()
@@ -544,6 +588,7 @@ function callback (response) {
       // If 1-4 check out establish session:
       .then(() => {
         Anvil.session = response
+        log.debug('callback(): session=', Anvil.session)
         Anvil.sessionState = response.session_state
         log.debug('callback(): session state=', Anvil.sessionState)
       })
@@ -763,7 +808,6 @@ Anvil.checkSession = checkSession
  */
 
 function updateSession (event) {
-  log.debug('updateSession()', event)
   if (event.key === 'anvil.connect') {
     log.debug('updateSession(): anvil.connect: calling deserialize')
     Anvil.promise.deserialize()
