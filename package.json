@@ -26,6 +26,7 @@
   "scripts": {
     "build": "grunt",
     "prepublish": "npm run build",
+    "postinstall": "jspm install",
     "test": "npm run test-chrome && npm run lint",
     "test_unit": "./node_modules/.bin/mocha --compilers js:babel-core/register -r babel-polyfill test_unit",
     "lint-src": "eslint --ignore-path .gitignore src && echo Source code looks good!",

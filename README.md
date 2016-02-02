@@ -2,17 +2,28 @@
 [![Build Status](https://travis-ci.org/anvilresearch/connect-js.svg?branch=master)](https://travis-ci.org/anvilresearch/connect-js)
 
 ## Install
+There is currently work in progress to update the client libraries to use
+webcrypto APIs instead of encryption libraries. See
+[Webcrypto API · Issue #7 · anvilresearch/connect-js](https://github.com/anvilresearch/connect-js/issues/7) for more details.
 
-once this would be published on npm:
-```bash
-$ npm install anvil-connect-js
-$ npm install
-$ jspm install
+To get the webcrypto code for testing a fork is used:
+
+```console
+$ # create or got to some suited directory then
+$ git clone https://github.com/henrjk/connect-js.git
+$ cd connect-js
+$ git checkout webcrypto
 ```
 
-Verify that tests pass:
-```bash
-$ npm run test
+Next install and verify that the tests pass:
+```console
+$ npm install
+$ npm run test  ## this should open a karma test run in Chrome.
+```
+
+In case this work is accepted it would presumable be published on npm. Then the install would just be:
+```console
+$ npm install anvil-connect-js
 ```
 
 ### API Documentation
