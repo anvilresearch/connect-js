@@ -24,11 +24,15 @@
   },
   "registry": "npm",
   "scripts": {
+    "clean": "grunt clean",
+    "clean-all": "grunt clean && rimraf jspm_packages && rimraf node_modules",
     "build": "grunt",
     "prepublish": "npm run build",
     "postinstall": "jspm install",
+    "dist": "npm run dist-min && npm run dist-src",
+    "dist-src": "jspm bundle-sfx src/anvil-connect dist/anvil-connect.src.js --format global --global-name Anvil",
+    "dist-min": "jspm bundle-sfx src/anvil-connect dist/anvil-connect.min.js --format global --global-name Anvil --minify",
     "test": "npm run test-chrome && npm run lint",
-    "test_unit": "./node_modules/.bin/mocha --compilers js:babel-core/register -r babel-polyfill test_unit",
     "lint-src": "eslint --ignore-path .gitignore src && echo Source code looks good!",
     "lint": "eslint --ignore-path .gitignore src test test.extended && echo Code looks good!",
     "lint-test": "eslint --ignore-path .gitignore test test.extended && echo Test code looks good!",
@@ -89,7 +93,8 @@
     "karma-jspm": "^2.0.2",
     "karma-safari-launcher": "^0.1.1",
     "karma-systemjs": "^0.10.0",
-    "q": "^1.4.1"
+    "q": "^1.4.1",
+    "rimraf": "^2.5.1"
   },
   "jspm": {
     "registry": "github",
