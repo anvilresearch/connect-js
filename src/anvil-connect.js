@@ -297,10 +297,10 @@ function serialize () {
   return cryptors.encryptor.encrypt(plaintext).then(({secret, encrypted}) => {
     setCookieSecret(secret)
     log.debug('serialize() stored secret in COOKIE anvil.connect')
-    localStorage['anvil.connect'] = encrypted
-    log.debug('serialize() stored encrypted session data in local storage anvil.connect')
     localStorage['anvil.connect.session.state'] = Anvil.sessionState
     log.debug('serialize() stored sessionState data in local storage anvil.connect.session.state')
+    localStorage['anvil.connect'] = encrypted
+    log.debug('serialize() stored encrypted session data in local storage anvil.connect')
   }).catch(err => {
     log.debug('serialize failed with error:', err, err.stack)
     throw err
