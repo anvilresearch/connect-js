@@ -298,7 +298,7 @@ function serialize () {
     setCookieSecret(secret)
     log.debug('serialize() stored secret in COOKIE anvil.connect')
     localStorage['anvil.connect.session.state'] = Anvil.sessionState
-    log.debug('serialize() stored sessionState data in local storage anvil.connect.session.state')
+    log.debug('serialize() stored sessionState in local storage anvil.connect.session.state', Anvil.sessionState)
     localStorage['anvil.connect'] = encrypted
     log.debug('serialize() stored encrypted session data in local storage anvil.connect')
   }).catch(err => {
@@ -341,9 +341,10 @@ function deserialize () {
     return session
   }).catch(e => {
     log.debug('Cannot deserialize session data', e)
-    // caller should reset session if desired.
-    // Anvil.session = session = parsed || {}
-    // Anvil.sessionState = localStorage['anvil.connect.session.state']
+    Anvil.session = session = {}
+    Anvil.sessionState = localStorage['anvil.connect.session.state']
+    Anvil.emit('not-authenticated', session)
+    return session
   })
 }
 
@@ -805,10 +806,11 @@ Anvil.destination = destination
  */
 
 function checkSession (id) {
-  log.debug('checkSession()', id)
+  // log.debug('checkSession()', id)
   var targetOrigin = Anvil.issuer
   var message = Anvil.params.client_id + ' ' + Anvil.sessionState
   var w = window.parent.document.getElementById(id).contentWindow
+  // log.debug(`checkSession(): postMessage (${message}, ${targetOrigin} to win of element ${id})`, w)
   w.postMessage(message, targetOrigin)
 }
 
@@ -827,7 +829,7 @@ function updateSession (event) {
   }
 }
 
-Anvil.updateSession = updateSession  // todo: should this be a promise?
+Anvil.updateSession = updateSession
 
 /**
  * Is Authenticated
