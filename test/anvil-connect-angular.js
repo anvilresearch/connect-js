@@ -45,7 +45,7 @@ angular.module('anvil', [])
 
     function requireAuthentication ($location, Anvil) {
       if (!Anvil.isAuthenticated()) {
-        Anvil.promise.authorize()
+        return Anvil.promise.authorize()
       }
 
       return Anvil.session
