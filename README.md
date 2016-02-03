@@ -91,6 +91,7 @@ the session.
 ##### Anvil.toFormUrlEncoded(obj)
 ##### Anvil.parseFormUrlEncoded(str)
 ##### Anvil.getUrlFragment(url)
+
 ##### Anvil.promise.deserialize()
 since 0.2.0
 
@@ -107,7 +108,7 @@ since 0.2.0: was promise before but is no longer available under Anvil.callback(
 ##### Anvil.promise.uri()
 since 0.2.0
 
-Can be used to connect the connect server.
+Can be used to connect to the connect server.
 
 Returns a promise
 
@@ -136,7 +137,7 @@ Anvil.signout('/')
 ```
 ##### Anvil.reset()
 
-Clears browser session state in localStorage, cookies and Anvil object.
+Clears browser session state in localStorage, cookies and Anvil session object.
 
 ##### Anvil.destination(path)
 
@@ -177,7 +178,8 @@ since 0.2.0: was promise before but is no longer available under Anvil.userInfo(
 
 ### AngularJS Usage
 
-**NOTE**: The information below applies to master and is mostly stale.
+**NOTE**: The information below applies to master and is mostly stale regarding
+this fork. 
 
 It is suggested to look at https://github.com/henrjk/connect-example-angularjs/
 for the webcrypto supporting version.
