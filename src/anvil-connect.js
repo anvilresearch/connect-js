@@ -673,23 +673,30 @@ function authorize () {
       let authMessageReceived = new Promise(function (resolve, reject) {
         let listener = function listener (event) {
           if (event.data !== '__ready__') {
+            log.debug('authorize() popup: received message event data __ready__')
             var fragment = getUrlFragment(event.data)
-            Anvil.promise.callback(parseFormUrlEncoded(fragment))
+            let response = parseFormUrlEncoded(fragment)
+            log.debug('authorize() popup: checking callback with received response:', response)
+            Anvil.promise.callback(response)
               .then(
               function (result) {
+                log.debug('authorize() popup: callback promise resolved:', result)
                 resolve(result)
               },
               function (fault) {
+                log.debug('authorize() popup: callback promise rejected:', fault)
                 reject(fault)
               }
             )
             window.removeEventListener('message', listener, false)
             if (popup) {
+              log.debug('authorize() popup: message event closing popup')
               popup.close()
             }
           }
         }
 
+        log.debug('authorize() popup: setting up message listener')
         window.addEventListener('message', listener, false)
       })
       // Some authentication methods will NOT cause a redirect ever!
@@ -702,14 +709,18 @@ function authorize () {
       // The listener below will react to the case where there is a
       // successful login and then close the popup.
       let authenticated = new Promise(function (resolve, reject) {
-        Anvil.once('authenticated', function () {
-          resolve()
+        log.debug('authorize() popup: setting up authenticated listener')
+        Anvil.once('authenticated', function (session) {
+          log.debug('authorize() popup: authenticated event received')
+          resolve(session)
           if (popup) {
+            log.debug('authorize() popup: authenticated event closing popup')
             popup.close()
           }
         })
       })
       return Anvil.promise.uri().then(uri => {
+        log.debug('authorize() popup: opening popup at:', uri)
         popup = window.open(uri, 'anvil', Anvil.popup(700, 500))
         return Promise.race([authMessageReceived, authenticated])
       })
