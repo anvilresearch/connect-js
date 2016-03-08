@@ -542,7 +542,7 @@ window.Anvil = (function () {
 
     function success (response) {
       setJWK(response && response.keys)
-      deferred.resolve(response)
+      deferred.resolve(response.data)
     }
 
     function failure (fault) {
