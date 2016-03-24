@@ -2,6 +2,20 @@
 
 ## WebCrypto
 
+### Testing
+
+Scenario server is running on a mac (macdev) in the LAN but want
+to test IE running on a windows computer.
+
+You can use devd on the Windows computer to proxy requests as follows:
+
+```command
+C:\Users\dev\bin>devd /=http://macdev:8080
+```
+
+Then on the Windows PC one can open IE or other browser on goto http://localhost
+
+
 ### Issues found:
 
 [WebCryptoAPI: importing jwk with use field fails | Microsoft Connect](https://connect.microsoft.com/IE/feedbackdetail/view/2242108/webcryptoapi-importing-jwk-with-use-field-fails)
@@ -133,7 +147,7 @@ Some handy tools for working with PEMs
 
 ```console
 
-$ ./bin/pem-jwk.js connect-js-test.pub.jwk 
+$ ./bin/pem-jwk.js connect-js-test.pub.jwk
 -----BEGIN RSA PUBLIC KEY-----
 MIIBCgKCAQEAnhubIr98ugQw+6JHq4c5aWGMlFAU+6dXFYewby7A+d4mY/EIY9tu
 jJWUIa0PXGx8e3KAi7vOF81tvUCIdbmlzduLWTy50zcIdBRO6d65020yQg4Mab+l
