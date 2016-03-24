@@ -108,8 +108,7 @@
       "bows": "npm:bows@^1.4.8",
       "text-encoder-lite": "npm:text-encoder-lite@^1.0.0",
       "tiny-emitter": "npm:tiny-emitter@^1.0.1",
-      "vibornoff/webcrypto-shim": "master",
-      "webcrypto-shim": "vibornoff/webcrypto-shim@master"
+      "webcrypto-shim": "npm:webcrypto-shim@^0.1.1"
     },
     "devDependencies": {
       "angular": "angular/bower-angular@^1.4.8",
@@ -130,6 +129,9 @@
             ]
           }
         }
+      },
+      "npm:webcrypto-shim@0.1.1": {
+        "format": "global"
       }
     }
   }

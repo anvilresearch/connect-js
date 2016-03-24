@@ -25,8 +25,7 @@ System.config({
     "q": "npm:q@1.4.1",
     "text-encoder-lite": "npm:text-encoder-lite@1.0.0",
     "tiny-emitter": "npm:tiny-emitter@1.0.1",
-    "vibornoff/webcrypto-shim": "github:vibornoff/webcrypto-shim@master",
-    "webcrypto-shim": "github:vibornoff/webcrypto-shim@master",
+    "webcrypto-shim": "npm:webcrypto-shim@0.1.1",
     "github:angular/bower-angular-mocks@1.4.8": {
       "angular": "github:angular/bower-angular@1.4.8"
     },

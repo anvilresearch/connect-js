@@ -1,5 +1,13 @@
 # Implementation notes about this code
 
+## JSPM tricks:
+
+This is with jspm version 0.16.31.
+Global mode may no longer work with jspm 0.17.
+
+jspm install npm:webcrypto-shim -o "{format: 'global'}"
+jspm install npm:text-encoder-lite -o "{format: 'global'}"
+
 ## WebCrypto
 
 ### Testing
