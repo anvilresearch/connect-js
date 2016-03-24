@@ -2,26 +2,40 @@
 [![Build Status](https://travis-ci.org/anvilresearch/connect-js.svg?branch=master)](https://travis-ci.org/anvilresearch/connect-js)
 
 ## Install
-There is currently work in progress to update the client libraries to use
-webcrypto APIs instead of encryption libraries. See
+There is currently work in progress to use
+the standard webcrypto APIs instead of encryption libraries. See
 [Webcrypto API · Issue #7 · anvilresearch/connect-js](https://github.com/anvilresearch/connect-js/issues/7) for more details.
+
+**CAUTION: This code has not been audited for security!!**
+
+Before using this code you should verify that it satisfies your intended
+scenario and risk profile.
+
+In particular it has not yet been verified by Security experts that the
+usage of the WebCrypto API is sound.
+
+**========**
 
 To get the webcrypto code for testing a fork is used:
 
 ```console
-$ # create or got to some suited directory then
-$ git clone https://github.com/henrjk/connect-js.git
-$ cd connect-js
-$ git checkout webcrypto
+$ # after you cloned https://github.com/anvilresearch/connect-js:
+$ git checkout webcrypto-api
 ```
 
-Next install and verify that the tests pass:
+Requirements are that npm is installed and also grunt-cli. The latter can
+be installed with
+```console
+npm install -g grunt-cli
+```
+
+Next install connect-js and verify that its tests pass:
 ```console
 $ npm install
 $ npm run test  ## this should open a karma test run in Chrome.
 ```
 
-In case this work is accepted it would presumable be published on npm. Then the install would just be:
+In case the webcrypto-api branch work is accepted it would presumable be published on npm. Then the install would just be:
 ```console
 $ npm install anvil-connect-js
 ```
@@ -179,7 +193,7 @@ since 0.2.0: was promise before but is no longer available under Anvil.userInfo(
 ### AngularJS Usage
 
 **NOTE**: The information below applies to master and is mostly stale regarding
-this fork. 
+this fork.
 
 It is suggested to look at https://github.com/henrjk/connect-example-angularjs/
 for the webcrypto supporting version.
