@@ -16,7 +16,6 @@ addons:
 
 before_install:
   - npm install -g npm
-  - npm install -g bower
   - npm install -g node-gyp
   - node-gyp clean
   - export CHROME_BIN=chromium-browser
@@ -27,7 +26,7 @@ install:
   - export CXX=g++-4.8
   - $CXX --version
   - npm install
-  - bower install
+  - jspm install
 
 script:
   - npm run test-all-travis
