@@ -1,5 +1,27 @@
 # Implementation notes about this code
 
+## Travis build fixups
+
+Safari was not (readily) available on our Travis build and I removed it.
+Perhaps one could add this but I have not researched this more.
+
+Firefox was recent enough to pass the tests but modified `.travis.yml`
+to install most recent firefox version.
+
+### See also section 'Github rate limit fix for travis build'
+
+### Chrome tests failed
+
+The previously configured Chromium is quite old (37.0.2062) and apparently
+ does not yet support WebCrypto as the tests are failing.
+
+The solution here was to install chrome within the travis build.
+See [update Firefox and Chromium · Issue #3475](travis-ci/travis-ci#3475)
+Note that this required to use `sudo: true` in  `.travis.yml`. However it
+appeared that the time for running our builds did not suffer.
+
+See also [Running Travis CI unit tests using Google Chrome](http://blog.500tech.com/setting-up-travis-ci-to-run-tests-on-latest-google-chrome-version/)
+
 ## JSPM tricks:
 
 This is with jspm version 0.16.31.
@@ -7,6 +29,48 @@ Global mode may no longer work with jspm 0.17.
 
 jspm install npm:webcrypto-shim -o "{format: 'global'}"
 jspm install npm:text-encoder-lite -o "{format: 'global'}"
+
+### Github rate limits
+
+#### Github rate limit fix on dev machine
+
+One can simple follow steps 1-4 of the gist mentione in the next section.
+See also [jspm-cli/registries.md at master · jspm/jspm-cli](https://github.com/jspm/jspm-cli/blob/master/docs/registries.md)
+
+#### Github rate limit fix for travis build
+
+[Travis setup of Github token for jspm](https://gist.github.com/topheman/25241e48a1b4f91ec6d4)
+
+**Notes '2) Create a token , label it "Travis"'**:
+
+The type of token to create is a personal access token which is equivalent
+with a password. Therefore setting a limited scope is a good idea.
+Scope: 'public-repo' was sufficient to build this (open source) project.
+
+**Notes '6) Install travis-cli'**:
+
+The command installed the travis command version 1.8.0. However I ran into
+the following error using this:
+
+    Outdated CLI version, run `gem install travis`.
+    Invalid scheme format: git@github.com
+    for a full error report, run travis report
+
+I found an issue at [As of yesterday Addressable broke `travis` · Issue #342 · travis-ci/travis.rb](https://github.com/travis-ci/travis.rb/issues/342).
+
+My workaround was to install the latest travis version:
+$ gem install travis --no-rdoc --no-ri
+Fetching: travis-1.8.2.gem (100%)
+Successfully installed travis-1.8.2
+1 gem installed
+
+This solved the issue for me.
+
+**Notes '7) Go to the root of your repo, encrypt the token your JSPM_GITHUB_AUTH_TOKEN'**:
+
+I tried also using --add on the `travis encrypt` command but this reformatted
+the .travis.yml file too much for my taste so manually updating this worked
+better for me.
 
 ## WebCrypto
 
