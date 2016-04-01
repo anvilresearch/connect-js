@@ -1,4 +1,4 @@
-sudo: false
+sudo: true
 
 language: node_js
 
@@ -32,12 +32,18 @@ addons:
 
 
 before_install:
+  # Chromium version is too ancient for WebCrypto use Chrome.
+  # http://blog.500tech.com/setting-up-travis-ci-to-run-tests-on-latest-google-chrome-version/ 
+  - sudo apt-get update
+  - sudo apt-get install -y libappindicator1 fonts-liberation
+  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  - sudo dpkg -i google-chrome*.deb
   - npm install -g npm
   - npm install -g node-gyp
   - node-gyp clean
   - npm install -g jspm
   - jspm config registries.github.auth $JSPM_GITHUB_AUTH_TOKEN
-  - export CHROME_BIN=chromium-browser
+  - export CHROME_BIN=/usr/bin/google-chrome
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
 
