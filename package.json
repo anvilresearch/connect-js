@@ -41,7 +41,7 @@
     "test-extended-chrome": "karma start karma.conf.extended.js --single-run --browsers Chrome",
     "test-safari": "karma start --single-run --browsers Safari",
     "test-all": "karma start --single-run --browsers Safari,Firefox,Chrome",
-    "test-all-travis": "karma start --single-run --browsers Safari,Firefox,ChromeOnTravis",
+    "test-all-travis": "karma start --single-run --browsers Firefox,ChromeOnTravis",
     "karma-browsers": "karma start --browsers Safari,Firefox,Chrome",
     "karma-browsers-extended": "karma start karma.conf.extended.js --browsers Safari,Firefox,Chrome",
     "karma": "karma run"
