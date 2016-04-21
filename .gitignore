@@ -1,2 +1,5 @@
+dist
 node_modules
-bower_components
+jspm_packages
+lib
+npm-debug.log

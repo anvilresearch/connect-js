@@ -1,6 +1,21 @@
-sudo: false
+sudo: true
 
 language: node_js
+
+# Avoid build issues due to rate limiting of github API
+# by configuring jspm to authenticate using a personal
+# Github token.
+# see Travis setup of Github token for jspm:
+# https://gist.github.com/topheman/25241e48a1b4f91ec6d4
+# for details.
+#
+# The secure encrypted environment variable  JSPM_GITHUB_AUTH_TOKEN
+# is expected to be added here, or can also be set in the project
+# settings.
+# This is how it looks:
+#env:
+#  global:
+#    - secure: "<long base64 encoded value>"
 
 node_js:
   - "4.0"
@@ -13,13 +28,22 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-4.8
+  firefox: latest
+
 
 before_install:
+  # Chromium version is too ancient for WebCrypto use Chrome.
+  # http://blog.500tech.com/setting-up-travis-ci-to-run-tests-on-latest-google-chrome-version/ 
+  - sudo apt-get update
+  - sudo apt-get install -y libappindicator1 fonts-liberation
+  - wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  - sudo dpkg -i google-chrome*.deb
   - npm install -g npm
-  - npm install -g bower
   - npm install -g node-gyp
   - node-gyp clean
-  - export CHROME_BIN=chromium-browser
+  - npm install -g jspm
+  - jspm config registries.github.auth $JSPM_GITHUB_AUTH_TOKEN
+  - export CHROME_BIN=/usr/bin/google-chrome
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
 
@@ -27,7 +51,7 @@ install:
   - export CXX=g++-4.8
   - $CXX --version
   - npm install
-  - bower install
+  - jspm install
 
 script:
   - npm run test-all-travis

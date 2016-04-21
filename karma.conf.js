@@ -12,35 +12,24 @@ module.exports = function (config) {
     basePath: '',
 
     // testing framework to use (jasmine/mocha/qunit/...)
-    frameworks: ['jasmine'],
+    // frameworks: ['systemjs', 'jspm', 'jasmine'],
+    frameworks: ['jspm', 'jasmine'],
 
     // list of files / patterns to load in the browser
-    files: [
-      'bower_components/sjcl/sjcl.js',
-      'bower_components/crypto-js/components/core.js',
-      'bower_components/crypto-js/components/sha1.js',
-      'bower_components/crypto-js/components/sha256.js',
-      'bower_components/crypto-js/components/x64-core.js',
-      'bower_components/crypto-js/components/sha512.js',
-      'bower_components/jsrsasign/ext/base64.js',
-      'bower_components/jsrsasign/ext/jsbn.js',
-      'bower_components/jsrsasign/ext/jsnb2.js',
-      'bower_components/jsrsasign/ext/rsa.js',
-      'bower_components/jsrsasign/ext/rsa2.js',
-      'bower_components/jsrsasign/rsapem-1.1.js',
-      'bower_components/jsrsasign/rsasign-1.2.js',
-      'bower_components/jsrsasign/asn1hex-1.1.js',
-      'bower_components/jsrsasign/x509-1.1.js',
-      'bower_components/jsrsasign/crypto-1.1.js',
-      'bower_components/jsrsasign/base64x-1.1.js',
-      'bower_components/jsrsasign/keyutil-1.0.js',
-      'bower_components/jsjws/ext/json-sans-eval.js',
-      'bower_components/jsjws/jws-2.0.js',
-      'bower_components/angular/angular.js',
-      'bower_components/angular-mocks/angular-mocks.js',
-      'anvil-connect.angular.js',
-      'test/anvil-connect.angular.coffee'
-    ],
+    files: [],
+
+    jspm: {
+      config: 'config.js',
+      loadFiles: ['test/**/*'],
+      serveFiles: ['src/*.js'],
+      paths: {
+      //   'src/*': 'base/src/*',
+      //   'test/*': 'base/test2/*',
+      //   'github:*': 'base/client/jspm_packages/github/*',
+      //   'npm:*': 'base/client/jspm_packages/npm/*'
+      }
+    },
+    // urlRoot: '/static/foo/',
 
     // list of files / patterns to exclude
     exclude: [],
@@ -57,7 +46,7 @@ module.exports = function (config) {
     // - PhantomJS
     // - IE (only Windows)
     browsers: [
-      'PhantomJS'
+      'Chrome'
     ],
 
     customLaunchers: {
@@ -69,10 +58,11 @@ module.exports = function (config) {
 
     // Which plugins to enable
     plugins: [
-      'karma-coffee-preprocessor',
-      'karma-phantomjs-launcher',
+      'karma-jspm',
+      // 'karma-systemjs',
       'karma-chrome-launcher',
       'karma-firefox-launcher',
+      'karma-safari-launcher',
       'karma-jasmine'
     ],
 
@@ -84,11 +74,8 @@ module.exports = function (config) {
 
     // level of logging
     // possible values: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_INFO
 
-    preprocessors: {
-      '**/*.coffee': ['coffee']
-    }
   // Uncomment the following lines if you are using grunt's server to run the tests
   // proxies: {
   //   '/': 'http://localhost:9000/'

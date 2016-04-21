@@ -1,6 +1,6 @@
 {
   "name": "anvil-connect-js",
-  "version": "0.1.1",
+  "version": "0.2.6",
   "description": "Anvil Connect JavaScript client for web browsers",
   "author": {
     "name": "Christian Smith",
@@ -12,16 +12,39 @@
       "name": "Tom Kersten",
       "email": "tom@whitespur.com",
       "url": "http://tomkersten.com"
+    },
+    {
+      "name": "Henrich Kraemer"
     }
   ],
-  "main": "anvil-connect.js",
+  "main": "lib/anvil-connect.js",
+  "directories": {
+    "src": "./src",
+    "lib": "./lib"
+  },
+  "registry": "npm",
   "scripts": {
-    "test": "karma start --single-run --browsers PhantomJS && npm run lint",
-    "lint": "eslint --ignore-path .gitignore . && echo Code looks good!",
+    "clean": "grunt clean",
+    "clean-all": "grunt clean && rimraf jspm_packages && rimraf node_modules",
+    "build": "grunt",
+    "prepublish": "npm run build",
+    "postinstall": "jspm install",
+    "dist": "npm run dist-min && npm run dist-src",
+    "dist-src": "jspm bundle-sfx src/anvil-connect dist/anvil-connect.src.js --format global --global-name Anvil",
+    "dist-min": "jspm bundle-sfx src/anvil-connect dist/anvil-connect.min.js --format global --global-name Anvil --minify",
+    "test": "npm run test-chrome && npm run lint",
+    "lint-src": "eslint --ignore-path .gitignore src && echo Source code looks good!",
+    "lint": "eslint --ignore-path .gitignore src test test.extended && echo Code looks good!",
+    "lint-test": "eslint --ignore-path .gitignore test test.extended && echo Test code looks good!",
     "test-firefox": "karma start --single-run --browsers Firefox",
     "test-chrome": "karma start --single-run --browsers Chrome",
-    "test-all": "karma start --single-run --browsers PhantomJS,Firefox,Chrome",
-    "test-all-travis": "karma start --single-run --browsers PhantomJS,Firefox,ChromeOnTravis"
+    "test-extended-chrome": "karma start karma.conf.extended.js --single-run --browsers Chrome",
+    "test-safari": "karma start --single-run --browsers Safari",
+    "test-all": "karma start --single-run --browsers Safari,Firefox,Chrome",
+    "test-all-travis": "karma start --single-run --browsers Firefox,ChromeOnTravis",
+    "karma-browsers": "karma start --browsers Safari,Firefox,Chrome",
+    "karma-browsers-extended": "karma start karma.conf.extended.js --browsers Safari,Firefox,Chrome",
+    "karma": "karma run"
   },
   "repository": {
     "type": "git",
@@ -41,17 +64,76 @@
     "url": "https://github.com/anvilresearch/connect-js/issues"
   },
   "homepage": "https://github.com/anvilresearch/connect-js",
+  "dependencies": {
+    "base64-js": "^1.0.2",
+    "bows": "^1.4.8",
+    "text-encoder-lite": "^1.0.0",
+    "tiny-emitter": "^1.0.2"
+  },
   "devDependencies": {
+    "angular": "^1.4.8",
+    "babel-core": "^6.4.5",
+    "babel-polyfill": "^6.3.14",
+    "babel-preset-es2015": "^6.1.18",
+    "babel-register": "^6.4.3",
     "eslint": "^1.5.1",
     "eslint-config-standard": "^4.4.0",
     "eslint-plugin-standard": "^1.3.1",
     "grunt": "^0.4.5",
+    "grunt-babel": "^6.0.0",
+    "grunt-cli": "^1.1.0",
+    "grunt-contrib-clean": "^0.7.0",
+    "grunt-contrib-watch": "^0.6.1",
     "grunt-release": "^0.13.0",
-    "karma": "^0.12.16",
+    "jasmine-core": "^2.4.1",
+    "jspm": "^0.16.25",
+    "karma": "^0.13.19",
     "karma-chrome-launcher": "^0.2.0",
-    "karma-coffee-preprocessor": "^0.2.1",
     "karma-firefox-launcher": "^0.1.6",
-    "karma-jasmine": "^0.1.5",
-    "karma-phantomjs-launcher": "^0.1.4"
+    "karma-jasmine": "^0.3.7",
+    "karma-jspm": "^2.0.2",
+    "karma-safari-launcher": "^0.1.1",
+    "karma-systemjs": "^0.10.0",
+    "q": "^1.4.1",
+    "rimraf": "^2.5.1"
+  },
+  "jspm": {
+    "registry": "github",
+    "main": "src/anvil-connect",
+    "format": "es6",
+    "directories": {
+      "lib": "src"
+    },
+    "dependencies": {
+      "base64-js": "npm:base64-js@^0.0.8",
+      "bows": "npm:bows@^1.4.8",
+      "text-encoder-lite": "npm:text-encoder-lite@^1.0.0",
+      "tiny-emitter": "npm:tiny-emitter@^1.0.1",
+      "webcrypto-shim": "npm:webcrypto-shim@^0.1.1"
+    },
+    "devDependencies": {
+      "angular": "angular/bower-angular@^1.4.8",
+      "angular-mocks": "angular/bower-angular-mocks@^1.4.8",
+      "babel": "npm:babel-core@^5.8.24",
+      "babel-runtime": "npm:babel-runtime@^5.8.24",
+      "core-js": "npm:core-js@^1.1.4",
+      "mockdate": "npm:mockdate@^1.0.3",
+      "q": "npm:q@^1.4.1"
+    },
+    "overrides": {
+      "npm:text-encoder-lite@1.0.0": {
+        "shim": {
+          "index": {
+            "exports": [
+              "TextEncoderLite",
+              "TextDecoderLite"
+            ]
+          }
+        }
+      },
+      "npm:webcrypto-shim@0.1.1": {
+        "format": "global"
+      }
+    }
   }
 }
