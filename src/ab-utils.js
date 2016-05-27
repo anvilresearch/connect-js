@@ -1,5 +1,5 @@
 /* eslint-env es6 */
-/* global TextEncoderLite, TextDecoderLite */
+/* global TextEncoder, TextDecoder */
 
 import * as base64 from 'base64-js'
 import 'text-encoder-lite'
@@ -52,11 +52,11 @@ export function hex2ab (hexstr) {
 // conversions.
 
 export function str2utf8ab (str) {
-  return new TextEncoderLite('utf-8').encode(str)
+  return new TextEncoder('utf-8').encode(str)
 }
 
 export function abutf82str (ab) {
-  return new TextDecoderLite('utf-8').decode(ab)
+  return new TextDecoder('utf-8').decode(ab)
 }
 
 export function str2ab (str) {
